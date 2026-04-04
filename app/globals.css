@@ -1,2 +1,13 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; background: #ffffff; }
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #1F7872;
+  --color-brand-dark: #195f5a;
+  --color-brand-light: #2a9d8f;
+}
+
+:root {
+  --color-brand: #1F7872;
+  --color-brand-dark: #195f5a;
+  --color-brand-light: #2a9d8f;
+}

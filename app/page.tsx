@@ -1,7 +1,10 @@
+import HeroSceneLoader from "./components/HeroSceneLoader";
+
 export default function Home() {
   return (
     <main>
-new page   
+      {/* <HeroSceneLoader /> */}
+      dwad
     </main>
   );
 }
