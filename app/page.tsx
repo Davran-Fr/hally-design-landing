@@ -1,10 +1,11 @@
-import HeroSceneLoader from "./components/HeroSceneLoader";
+import Hero from './components/Hero';
 
 export default function Home() {
   return (
     <main>
-      {/* <HeroSceneLoader /> */}
-      dwad
+      <Hero />
+      <Hero />
+
     </main>
   );
 }
