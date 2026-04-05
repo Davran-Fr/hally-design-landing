@@ -202,7 +202,7 @@ export default function Hero() {
             </p>
           </div>
         </div>
-         <p className="max-w-[500px] text-center text-lg  font-light leading-[1.9] tracking-[0.02em] text-neutral-400 select-none">
+         <p className="max-w-[500px] text-center text-lg  font-medium leading-[1.9] tracking-[0.02em] text-neutral-400 select-none">
           We curate art, shape environments, and command light —
           three disciplines united by a single belief that every space
           has the power to leave a lasting impression.
