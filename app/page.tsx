@@ -4,8 +4,9 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <Hero />
-
+      <div className='min-h-screen'>
+ new page
+      </div>
     </main>
   );
 }
