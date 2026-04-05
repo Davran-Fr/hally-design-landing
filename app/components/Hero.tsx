@@ -38,7 +38,7 @@ const VIDEO_CARDS_DESKTOP: CardConfig[] = [
   { pos: { top: '5%',   right: '29%' },             size: 'w-42 h-32', rotate: '-1deg',   opacity: 0.2, speed: 0.60 },
   { pos: { top: '-10%', right: '2%'  },             size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.85 },
   { pos: { top: '40%',  left: '1%'   },             size: 'w-42 h-32', rotate: '1deg',    opacity: 1,   speed: 0.90 },
-  { pos: { top: '37%',  right: '15%' },             size: 'w-44 h-44', rotate: '-1.5deg', opacity: 1,   speed: 1.10 },
+  { pos: { top: '37%',  right: '15%' },             size: 'w-44 h-44', rotate: '-1.5deg', opacity: 0.8,   speed: 0.90 },
   { pos: { top: '77%',  left: 'calc(50% - 8px)' }, size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.5, speed: 0.70 },
   { pos: { bottom: '-10%', left: '15%' },           size: 'w-62 h-52', rotate: '-1.5deg', opacity: 1,   speed: 0.75 },
   { pos: { bottom: '-20%', right: '2%' },           size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.80 },
@@ -159,7 +159,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[100vh] flex items-center justify-center">
+    <section className="relative min-h-screen max-w-[1400px] mx-auto flex items-center justify-center">
       {/* Video cards — ScrollTrigger parallax depth per card */}
       {VIDEOS.map((src, i) => (
         <div
@@ -190,12 +190,12 @@ export default function Hero() {
 
 
         {/* Logo row */}
-        <div className="flex items-baseline gap-4 pl-30">
-          <h1 className="text-7xl text-brand font-black shrink-0">Hally</h1>
+        <div className="flex items-baseline gap-4 pl-20">
+          <h1 className="text-9xl text-brand font-black shrink-0">Hally</h1>
         {/* Description above logo */}
           <div className="overflow-hidden w-[220px]">
             <p
-              className="text-3xl font-extralight tracking-[-0.02em] select-none"
+              className="text-4xl font-extralight tracking-[-0.02em] select-none"
               style={{ WebkitTextStroke: '1px #1F7872', color: 'transparent' }}
             >
               <span ref={wordRef} className="inline-block" />
