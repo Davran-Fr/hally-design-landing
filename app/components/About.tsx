@@ -6,45 +6,59 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const VIDEOS = [
-  '/video/design.webm',
-  '/video/design2.webm',
-  '/video/design3.webm',
-  '/video/design4.webm',
-  '/video/design5.webm',
-];
-
-const CARDS = Array.from({ length: 5 }, (_, i) => ({
-  angle: i * 72,
-  src: VIDEOS[i],
-}));
-
 const RADIUS = 250;
 const CARD_W = 320;
 const CARD_H = 220;
 const TILT_X = -8;
+const CARD_COUNT = 5;
 
 const SLIDES = [
   {
     word: 'Design',
     text: 'We curate art, shape environments, and command light — three disciplines united by a single belief that every space has the power to leave a lasting impression.',
+    images: [
+      '/images/design2.jpg',
+      '/images/design3.jpg',
+      '/images/design4.jpg',
+      '/images/design5.jpg',
+      '/images/design2.jpg', // 5th card — repeat
+    ],
   },
   {
     word: 'Art Gallery',
     text: 'We collect and present works that challenge perception, provoke emotion, and transform ordinary walls into windows of meaning.',
+    images: [
+      '/images/gallery.jpg',
+      '/images/gallery2.jpg',
+      '/images/gallery3.jpg',
+      '/images/gallery.jpg',
+      '/images/gallery2.jpg',
+    ],
   },
   {
     word: 'Lighting',
     text: 'We engineer light as a material — sculpting atmosphere, guiding focus, and turning architecture into lived experience.',
+    images: [
+      '/images/lighting.jpg',
+      '/images/lighting2.jpg',
+      '/images/lighting3.jpg',
+      '/images/lighting.jpg',
+      '/images/lighting2.jpg',
+    ],
   },
 ];
 
+const CARDS = Array.from({ length: CARD_COUNT }, (_, i) => ({
+  angle: i * (360 / CARD_COUNT),
+}));
+
 export default function About() {
-  const sectionRef    = useRef<HTMLElement>(null);
-  const cylinderRef   = useRef<HTMLDivElement>(null);
-  const cardRefs      = useRef<(HTMLDivElement | null)[]>([]);
-  const wordRef       = useRef<HTMLSpanElement>(null);
-  const paraRef       = useRef<HTMLParagraphElement>(null);
+  const sectionRef  = useRef<HTMLElement>(null);
+  const cylinderRef = useRef<HTMLDivElement>(null);
+  const cardRefs    = useRef<(HTMLDivElement | null)[]>([]);
+  const imgRefs     = useRef<(HTMLImageElement | null)[]>([]);
+  const wordRef     = useRef<HTMLSpanElement>(null);
+  const paraRef     = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const el = cylinderRef.current;
@@ -74,7 +88,7 @@ export default function About() {
     wrap?.addEventListener('mouseenter', pause);
     wrap?.addEventListener('mouseleave', resume);
 
-    // ── Scroll-driven text swap ──
+    // ── Scroll-driven text + image swap ──
     const wordEl = wordRef.current;
     const paraEl = paraRef.current;
     if (!wordEl || !paraEl) return;
@@ -86,6 +100,7 @@ export default function About() {
       current = index;
       const slide = SLIDES[index];
 
+      // Fade out text
       gsap.to([wordEl, paraEl], {
         opacity: 0,
         y: -18,
@@ -101,16 +116,34 @@ export default function About() {
           );
         },
       });
+
+      // Fade out cards, swap images, fade in
+      gsap.to(imgRefs.current.filter(Boolean), {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.in',
+        onComplete: () => {
+          imgRefs.current.forEach((img, i) => {
+            if (!img) return;
+            img.src = slide.images[i];
+          });
+          gsap.to(imgRefs.current.filter(Boolean), {
+            opacity: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+          });
+        },
+      });
     };
 
-    // Pin the section for 3× its height so scroll has room
+    // Pin the section
     ScrollTrigger.create({
       trigger: sectionRef.current,
       start: 'top top',
       end: '+=200%',
       pin: true,
       onUpdate: (self) => {
-        const p = self.progress; // 0 → 1
+        const p = self.progress;
         if (p < 0.33) goTo(0);
         else if (p < 0.66) goTo(1);
         else goTo(2);
@@ -169,7 +202,7 @@ export default function About() {
             willChange: 'transform',
           }}
         >
-          {CARDS.map(({ angle, src }, i) => (
+          {CARDS.map(({ angle }, i) => (
             <div
               key={angle}
               ref={(el) => { cardRefs.current[i] = el; }}
@@ -179,12 +212,11 @@ export default function About() {
                 transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
               }}
             >
-              <video
-                src={src}
-                autoPlay
-                muted
-                loop
-                playsInline
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={(el) => { imgRefs.current[i] = el; }}
+                src={SLIDES[0].images[i]}
+                alt=""
                 style={{
                   width: '100%',
                   height: '100%',
