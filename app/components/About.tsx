@@ -59,6 +59,10 @@ export default function About() {
   const imgRefs     = useRef<(HTMLImageElement | null)[]>([]);
   const wordRef     = useRef<HTMLSpanElement>(null);
   const paraRef     = useRef<HTMLParagraphElement>(null);
+  const dotRefs     = useRef<(HTMLButtonElement | null)[]>([]);
+  const lineRef     = useRef<HTMLSpanElement>(null);
+  const labelRef    = useRef<HTMLSpanElement>(null);
+  const textBlockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = cylinderRef.current;
@@ -82,11 +86,57 @@ export default function About() {
       },
     });
 
+    // ── Drag to rotate ──
     const wrap = el.parentElement;
-    const pause  = () => tween.pause();
-    const resume = () => tween.resume();
-    wrap?.addEventListener('mouseenter', pause);
-    wrap?.addEventListener('mouseleave', resume);
+    let isDragging = false;
+    let dragStartX = 0;
+    let ryAtDragStart = 0;
+    let resumeTimer: ReturnType<typeof setTimeout>;
+
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      dragStartX = e.clientX;
+      ryAtDragStart = state.ry;
+      tween.pause();
+      clearTimeout(resumeTimer);
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      if (wrap) wrap.style.cursor = 'grabbing';
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartX;
+      const newRy = ryAtDragStart + dx * 0.5;
+      state.ry = ((newRy % 360) + 360) % 360;
+      el.style.transform = `rotateX(${TILT_X}deg) rotateY(${state.ry}deg)`;
+      cardRefs.current.forEach((card, i) => {
+        if (!card) return;
+        const effective = ((CARDS[i].angle + state.ry) % 360 + 360) % 360;
+        const cos = Math.cos((effective * Math.PI) / 180);
+        card.style.opacity = String(0.35 + 0.65 * ((cos + 1) / 2));
+      });
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (wrap) wrap.style.cursor = 'grab';
+      // Sync tween playhead to current rotation, then resume
+      resumeTimer = setTimeout(() => {
+        const dur = tween.duration();
+        tween.time((state.ry / 360) * dur);
+        tween.resume();
+      }, 800);
+    };
+
+    if (wrap) {
+      wrap.style.cursor = 'grab';
+      wrap.addEventListener('pointerdown', onPointerDown);
+      wrap.addEventListener('pointermove', onPointerMove);
+      wrap.addEventListener('pointerup', onPointerUp);
+      wrap.addEventListener('pointercancel', onPointerUp);
+    }
+
 
     // ── Scroll-driven text + image swap ──
     const wordEl = wordRef.current;
@@ -94,17 +144,111 @@ export default function About() {
     if (!wordEl || !paraEl) return;
 
     let current = 0;
+    let currentImages = 0;
+    let pendingIndex = -1;
+    let spinTween: gsap.core.Tween | null = null;
+    let imgTween: gsap.core.Tween | null = null;
+
+    const imgs = imgRefs.current.filter(Boolean) as HTMLImageElement[];
+
+    const dots = dotRefs.current.filter(Boolean) as HTMLButtonElement[];
+
+    const updateDots = (index: number) => {
+      dots.forEach((dot, i) => {
+        gsap.to(dot, {
+          width: i === index ? 32 : 8,
+          backgroundColor: i === index ? '#1F7872' : '#d4d4d4',
+          duration: 0.4,
+          ease: 'power2.out',
+        });
+      });
+    };
+
+    // ── Entrance animation ──
+    const textBlock = textBlockRef.current;
+    const line = lineRef.current;
+    const label = labelRef.current;
+    if (textBlock && line && label) {
+      gsap.set([label, wordRef.current, paraRef.current, ...dots], { opacity: 0, y: 30 });
+      gsap.set(line, { scaleX: 0 });
+
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 80%',
+        once: true,
+        onEnter: () => {
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+          tl.to(line, { scaleX: 1, duration: 0.6 })
+            .to(label, { opacity: 1, y: 0, duration: 0.5 }, '-=0.3')
+            .to(wordRef.current, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2')
+            .to(paraRef.current, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3')
+            .to(dots, { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 }, '-=0.3');
+        },
+      });
+    }
+
+    const swapImages = (index: number) => {
+      if (index === currentImages) return;
+      currentImages = index;
+
+      // Kill any in-progress image tween
+      imgTween?.kill();
+
+      imgTween = gsap.to(imgs, {
+        opacity: 0,
+        duration: 0.15,
+        ease: 'power1.in',
+        onComplete: () => {
+          imgs.forEach((img, i) => { img.src = SLIDES[index].images[i]; });
+          imgTween = gsap.to(imgs, { opacity: 1, duration: 0.3, ease: 'power1.out' });
+        },
+      });
+    };
+
+    const decelerate = () => {
+      spinTween?.kill();
+      spinTween = gsap.to(tween, {
+        timeScale: 1,
+        duration: 1.4,
+        ease: 'power3.out',
+        onComplete: () => {
+          // If a new slide was requested while spinning — apply it now
+          if (pendingIndex !== -1 && pendingIndex !== current) {
+            const next = pendingIndex;
+            pendingIndex = -1;
+            goTo(next);
+          }
+        },
+      });
+    };
 
     const goTo = (index: number) => {
       if (index === current) return;
+
+      // If already spinning fast — swap text + images immediately
+      if (tween.timeScale() > 2) {
+        pendingIndex = index;
+        current = index;
+        gsap.killTweensOf([wordEl, paraEl]);
+        wordEl.textContent = SLIDES[index].word;
+        paraEl.textContent = SLIDES[index].text;
+        gsap.fromTo([wordEl, paraEl], { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.3 });
+        swapImages(index);
+        updateDots(index);
+        return;
+      }
+
       current = index;
+      pendingIndex = -1;
+      updateDots(index);
       const slide = SLIDES[index];
 
-      // Fade out text
+      // Fade out text → swap → fade in
+      gsap.killTweensOf([wordEl, paraEl]);
       gsap.to([wordEl, paraEl], {
         opacity: 0,
         y: -18,
-        duration: 0.25,
+        duration: 0.2,
         ease: 'power2.in',
         onComplete: () => {
           wordEl.textContent = slide.word;
@@ -112,26 +256,20 @@ export default function About() {
           gsap.fromTo(
             [wordEl, paraEl],
             { opacity: 0, y: 18 },
-            { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }
+            { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
           );
         },
       });
 
-      // Fade out cards, swap images, fade in
-      gsap.to(imgRefs.current.filter(Boolean), {
-        opacity: 0,
-        duration: 0.2,
+      // Accelerate → swap images → decelerate
+      spinTween?.kill();
+      spinTween = gsap.to(tween, {
+        timeScale: 8,
+        duration: 0.35,
         ease: 'power2.in',
         onComplete: () => {
-          imgRefs.current.forEach((img, i) => {
-            if (!img) return;
-            img.src = slide.images[i];
-          });
-          gsap.to(imgRefs.current.filter(Boolean), {
-            opacity: 1,
-            duration: 0.3,
-            ease: 'power2.out',
-          });
+          swapImages(current);
+          decelerate();
         },
       });
     };
@@ -152,8 +290,11 @@ export default function About() {
 
     return () => {
       tween.kill();
-      wrap?.removeEventListener('mouseenter', pause);
-      wrap?.removeEventListener('mouseleave', resume);
+      clearTimeout(resumeTimer);
+      wrap?.removeEventListener('pointerdown', onPointerDown);
+      wrap?.removeEventListener('pointermove', onPointerMove);
+      wrap?.removeEventListener('pointerup', onPointerUp);
+      wrap?.removeEventListener('pointercancel', onPointerUp);
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
@@ -164,31 +305,64 @@ export default function About() {
       className="relative h-screen px-6 md:px-16 max-w-[1400px] mt-20 mx-auto flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden"
     >
       {/* ── Left: text ── */}
-      <div className="md:w-[58%] shrink-0 flex flex-col">
-        <h2 className="text-7xl text-brand font-bold">
-          <span className="text-xs tracking-[0.22em] uppercase text-black font-medium mr-2">
+      <div ref={textBlockRef} className="md:w-[58%] shrink-0 flex flex-col">
+        {/* Label with decorative line */}
+        <div className="flex items-center gap-3 mb-4">
+          <span
+            ref={lineRef}
+            className="inline-block w-10 h-[2px] bg-brand origin-left"
+          />
+          <span
+            ref={labelRef}
+            className="text-xs tracking-[0.22em] uppercase text-brand font-semibold"
+          >
             About
           </span>
-          <span ref={wordRef} style={{ display: 'block' }}>
+        </div>
+
+        {/* Heading */}
+        <h2 className="relative">
+          <span
+            ref={wordRef}
+            className="text-7xl md:text-8xl font-bold text-brand block leading-[1.05]"
+          >
             {SLIDES[0].word}
           </span>
         </h2>
 
+        {/* Description */}
         <p
           ref={paraRef}
-          className="text-neutral-700 font-medium leading-[1.9] max-w-lg text-2xl mt-7"
+          className="text-neutral-600 font-medium leading-[1.9] max-w-lg text-lg md:text-xl mt-8"
         >
           {SLIDES[0].text}
         </p>
+
+        {/* Slide indicators */}
+        <div className="flex items-center gap-2 mt-10">
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              ref={(el) => { dotRefs.current[i] = el; }}
+              aria-label={`Slide ${i + 1}`}
+              className="h-2 rounded-full transition-colors"
+              style={{
+                width: i === 0 ? 32 : 8,
+                backgroundColor: i === 0 ? '#1F7872' : '#d4d4d4',
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       {/* ── Right: 3D cylinder carousel ── */}
       <div
-        className="flex-1 flex items-center justify-center"
+        className="flex-1 flex items-center justify-center select-none"
         style={{
           height: 520,
           perspective: '1200px',
           perspectiveOrigin: '10% 50%',
+          touchAction: 'none',
         }}
       >
         <div
@@ -217,6 +391,7 @@ export default function About() {
                 ref={(el) => { imgRefs.current[i] = el; }}
                 src={SLIDES[0].images[i]}
                 alt=""
+                draggable={false}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -224,6 +399,7 @@ export default function About() {
                   borderRadius: 10,
                   display: 'block',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                  pointerEvents: 'none',
                 }}
               />
             </div>
