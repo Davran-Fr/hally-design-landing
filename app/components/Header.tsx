@@ -30,7 +30,7 @@ export default function Header() {
     <>
       {/* ── Header ── */}
       <header className={`
-        fixed top-2.5 left-1/2 max-w-100 font-cormorant -translate-x-1/2 z-50
+        fixed top-2.5 left-1/2 max-w-[350px] font-cormorant -translate-x-1/2 z-50
         w-[calc(100%-2rem)] bg-white/50 border border-brand/50
         backdrop-blur-2xl rounded-full overflow-hidden
         transition-all duration-500

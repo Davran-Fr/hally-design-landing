@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { SplitText } from 'gsap/SplitText';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
-gsap.registerPlugin(SplitText, ScrollTrigger, ScrollSmoother);
+gsap.registerPlugin(SplitText, ScrollTrigger);
 
 const WORDS = ['Design', 'Art Gallery', 'Lighting'];
 
@@ -22,48 +21,66 @@ const VIDEOS = [
   '/video/lighting1.webm',
 ];
 
-// Senior designer layout: organic scatter, varied sizes, slight tilts, depth via opacity
-// opacity: 1 = featured | 0.5 = supporting | 0.1 = ghostly background
-// speed < 1 → drifts behind scroll (distant) | speed > 1 → leads scroll (close)
-const VIDEO_CARDS: {
+type CardConfig = {
   pos: React.CSSProperties;
   size: string;
   rotate: string;
   opacity: number;
   speed: number;
-}[] = [
-  { pos: { top: '-4%',  left: '-2%'   },              size: 'w-62 h-52', rotate: '-2deg',   opacity: 1,   speed: 0.80 }, // featured
-  { pos: { top: '20%', left: '25%'  },              size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.1, speed: 0.50 }, // supporting
-  { pos: { top: '5%',  right: '29%' },              size: 'w-42 h-32', rotate: '-1deg',   opacity: 0.2, speed: 0.60 }, // ghostly
-  { pos: { top: '-10%',  right: '2%'  },              size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.85 }, // featured
-  { pos: { top: '40%', left: '1%'   },              size: 'w-42 h-32', rotate: '1deg',    opacity: 1,   speed: 0.90 }, // ghostly
-  { pos: { top: '37%', right: '15%' },              size: 'w-44 h-44', rotate: '-1.5deg', opacity: 1,   speed: 1.10 }, // supporting
-  { pos: { top: '77%', left: 'calc(50% - 8px)' },  size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.5, speed: 0.70 }, // center-bottom
-  { pos: { bottom: '-10%', left: '15%' },            size: 'w-62 h-52', rotate: '-1.5deg', opacity: 1,   speed: 0.75 }, // featured
-  { pos: { bottom: '-20%',  right: '2%' },            size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.80 }, // featured
+};
+
+// Desktop — organic scatter, varied sizes, slight tilts, depth via opacity
+// opacity: 1 = featured | 0.5 = supporting | 0.1 = ghostly
+// speed < 1 → drifts behind (distant) | speed > 1 → leads scroll (close)
+const VIDEO_CARDS_DESKTOP: CardConfig[] = [
+  { pos: { top: '-4%',  left: '-2%'  },             size: 'w-62 h-52', rotate: '-2deg',   opacity: 1,   speed: 0.80 },
+  { pos: { top: '20%',  left: '25%'  },             size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.1, speed: 0.50 },
+  { pos: { top: '5%',   right: '29%' },             size: 'w-42 h-32', rotate: '-1deg',   opacity: 0.2, speed: 0.60 },
+  { pos: { top: '-10%', right: '2%'  },             size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.85 },
+  { pos: { top: '40%',  left: '1%'   },             size: 'w-42 h-32', rotate: '1deg',    opacity: 1,   speed: 0.90 },
+  { pos: { top: '37%',  right: '15%' },             size: 'w-44 h-44', rotate: '-1.5deg', opacity: 1,   speed: 1.10 },
+  { pos: { top: '77%',  left: 'calc(50% - 8px)' }, size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.5, speed: 0.70 },
+  { pos: { bottom: '-10%', left: '15%' },           size: 'w-62 h-52', rotate: '-1.5deg', opacity: 1,   speed: 0.75 },
+  { pos: { bottom: '-20%', right: '2%' },           size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.80 },
+];
+
+// Mobile — cards hug the edges/corners, centre text zone stays clear
+// All cards stay within ~30% from the nearest edge so they never cover the text
+const VIDEO_CARDS_MOBILE: CardConfig[] = [
+  { pos: { top: '-5%',   left: '-6%'   }, size: 'w-36 h-28', rotate: '-2deg',   opacity: 1,    speed: 0.80 }, // top-left corner
+  { pos: { top: '22%',   left: '-4%'   }, size: 'w-24 h-16', rotate: '1.5deg',  opacity: 0.12, speed: 0.50 }, // left rail, upper
+  { pos: { top: '22%',   right: '-4%'  }, size: 'w-24 h-16', rotate: '-1deg',   opacity: 0.12, speed: 0.60 }, // right rail, upper
+  { pos: { top: '-8%',   right: '-4%'  }, size: 'w-36 h-28', rotate: '2deg',    opacity: 1,    speed: 0.85 }, // top-right corner
+  { pos: { top: '46%',   left: '-5%'   }, size: 'w-28 h-20', rotate: '1deg',    opacity: 0.9,  speed: 0.90 }, // left rail, mid
+  { pos: { top: '46%',   right: '-6%'  }, size: 'w-28 h-20', rotate: '-1.5deg', opacity: 1,    speed: 1.10 }, // right rail, mid
+  { pos: { top: '74%',   left: '-4%'   }, size: 'w-24 h-16', rotate: '1.5deg',  opacity: 0.5,  speed: 0.70 }, // left rail, lower
+  { pos: { bottom: '-4%', left: '5%'   }, size: 'w-36 h-28', rotate: '-1.5deg', opacity: 1,    speed: 0.75 }, // bottom-left corner
+  { pos: { bottom: '-7%', right: '-3%' }, size: 'w-36 h-28', rotate: '2deg',    opacity: 1,    speed: 0.80 }, // bottom-right corner
 ];
 
 export default function Hero() {
-  const smoothWrapperRef = useRef<HTMLDivElement>(null);
-  const smoothContentRef = useRef<HTMLDivElement>(null);
-  const wordRef          = useRef<HTMLSpanElement>(null);
-  const videoRefs        = useRef<(HTMLDivElement | null)[]>([]);
+  const wordRef     = useRef<HTMLSpanElement>(null);
+  const videoRefs   = useRef<(HTMLDivElement | null)[]>([]);
 
-  // ScrollSmoother — wrapper/content enable smooth page scroll + data-speed parallax per card
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const smoother = ScrollSmoother.create({
-      wrapper:  smoothWrapperRef.current!,
-      content:  smoothContentRef.current!,
-      smooth:   1.5,
-      effects:  true,
-    });
-    return () => smoother.kill();
+    const mq = window.matchMedia('(max-width: 767px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Staggered fade-in — each card animates to its own target opacity
+  const VIDEO_CARDS = isMobile ? VIDEO_CARDS_MOBILE : VIDEO_CARDS_DESKTOP;
+
+  // Staggered fade-in + ScrollTrigger parallax per card
   useEffect(() => {
+    const triggers: ReturnType<typeof ScrollTrigger.create>[] = [];
+
     videoRefs.current.forEach((el, i) => {
       if (!el) return;
+
+      // fade-in
       gsap.fromTo(
         el,
         { opacity: 0, scale: 0.92, y: 12 },
@@ -76,7 +93,22 @@ export default function Hero() {
           delay: 0.4 + i * 0.18,
         }
       );
+
+      // parallax — speed 1 = no shift, <1 = slow/far, >1 = fast/close
+      const depth = (VIDEO_CARDS[i].speed - 1) * 200;
+      const trig = ScrollTrigger.create({
+        trigger: 'body',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true,
+        onUpdate: (self) => {
+          gsap.set(el, { y: self.progress * depth });
+        },
+      });
+      triggers.push(trig);
     });
+
+    return () => triggers.forEach((t) => t.kill());
   }, []);
 
   // Cycling word animation
@@ -127,18 +159,14 @@ export default function Hero() {
   }, []);
 
   return (
-    <div ref={smoothWrapperRef} style={{ overflow: 'hidden' }}>
-      <div ref={smoothContentRef}>
     <section className="relative min-h-[100vh] flex items-center justify-center">
-      {/* Video cards — data-speed drives ScrollSmoother parallax depth per card */}
+      {/* Video cards — ScrollTrigger parallax depth per card */}
       {VIDEOS.map((src, i) => (
-        // outer: position anchor + fade-in target
         <div
           key={src}
           ref={(el) => { videoRefs.current[i] = el; }}
           className="absolute opacity-0"
           style={VIDEO_CARDS[i].pos}
-          data-speed={VIDEO_CARDS[i].speed}
         >
           {/* inner: rotation + shadow — isolated from GSAP transforms */}
           <div
@@ -182,7 +210,5 @@ export default function Hero() {
 
       </div>
     </section>
-      </div>
-    </div>
   );
 }

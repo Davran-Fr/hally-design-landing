@@ -5,7 +5,7 @@ export default function Home() {
     <main>
       <Hero />
       <div className='min-h-screen'>
- new pagedw
+        daw
       </div>
     </main>
   );
