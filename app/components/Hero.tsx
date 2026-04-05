@@ -3,8 +3,10 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { SplitText } from 'gsap/SplitText';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
-gsap.registerPlugin(SplitText);
+gsap.registerPlugin(SplitText, ScrollTrigger, ScrollSmoother);
 
 const WORDS = ['Design', 'Art Gallery', 'Lighting'];
 
@@ -22,26 +24,41 @@ const VIDEOS = [
 
 // Senior designer layout: organic scatter, varied sizes, slight tilts, depth via opacity
 // opacity: 1 = featured | 0.5 = supporting | 0.1 = ghostly background
+// speed < 1 → drifts behind scroll (distant) | speed > 1 → leads scroll (close)
 const VIDEO_CARDS: {
   pos: React.CSSProperties;
   size: string;
   rotate: string;
   opacity: number;
+  speed: number;
 }[] = [
-  { pos: { top: '-4%',  left: '-2%'   },              size: 'w-62 h-52', rotate: '-2deg',   opacity: 1   }, // featured
-  { pos: { top: '20%', left: '25%'  },              size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.1 }, // supporting
-  { pos: { top: '5%',  right: '29%' },              size: 'w-42 h-32', rotate: '-1deg',   opacity: 0.2 }, // ghostly
-  { pos: { top: '-10%',  right: '2%'  },              size: 'w-62 h-52', rotate: '2deg',    opacity: 1   }, // featured
-  { pos: { top: '40%', left: '1%'   },              size: 'w-42 h-32', rotate: '1deg',    opacity: 1 }, // ghostly
-  { pos: { top: '37%', right: '15%' },              size: 'w-44 h-44', rotate: '-1.5deg', opacity: 5 }, // supporting
-  { pos: { top: '77%', left: 'calc(50% - 8px)' },  size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.5 }, // center-bottom
-  { pos: { bottom: '-10%', left: '15%' },            size: 'w-62 h-52', rotate: '-1.5deg', opacity: 1   }, // featured
-  { pos: { bottom: '-20%',  right: '2%' },            size: 'w-62 h-52', rotate: '2deg',    opacity: 1   }, // featured
+  { pos: { top: '-4%',  left: '-2%'   },              size: 'w-62 h-52', rotate: '-2deg',   opacity: 1,   speed: 0.80 }, // featured
+  { pos: { top: '20%', left: '25%'  },              size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.1, speed: 0.50 }, // supporting
+  { pos: { top: '5%',  right: '29%' },              size: 'w-42 h-32', rotate: '-1deg',   opacity: 0.2, speed: 0.60 }, // ghostly
+  { pos: { top: '-10%',  right: '2%'  },              size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.85 }, // featured
+  { pos: { top: '40%', left: '1%'   },              size: 'w-42 h-32', rotate: '1deg',    opacity: 1,   speed: 0.90 }, // ghostly
+  { pos: { top: '37%', right: '15%' },              size: 'w-44 h-44', rotate: '-1.5deg', opacity: 1,   speed: 1.10 }, // supporting
+  { pos: { top: '77%', left: 'calc(50% - 8px)' },  size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.5, speed: 0.70 }, // center-bottom
+  { pos: { bottom: '-10%', left: '15%' },            size: 'w-62 h-52', rotate: '-1.5deg', opacity: 1,   speed: 0.75 }, // featured
+  { pos: { bottom: '-20%',  right: '2%' },            size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.80 }, // featured
 ];
 
 export default function Hero() {
-  const wordRef    = useRef<HTMLSpanElement>(null);
-  const videoRefs  = useRef<(HTMLDivElement | null)[]>([]);
+  const smoothWrapperRef = useRef<HTMLDivElement>(null);
+  const smoothContentRef = useRef<HTMLDivElement>(null);
+  const wordRef          = useRef<HTMLSpanElement>(null);
+  const videoRefs        = useRef<(HTMLDivElement | null)[]>([]);
+
+  // ScrollSmoother — wrapper/content enable smooth page scroll + data-speed parallax per card
+  useEffect(() => {
+    const smoother = ScrollSmoother.create({
+      wrapper:  smoothWrapperRef.current!,
+      content:  smoothContentRef.current!,
+      smooth:   1.5,
+      effects:  true,
+    });
+    return () => smoother.kill();
+  }, []);
 
   // Staggered fade-in — each card animates to its own target opacity
   useEffect(() => {
@@ -110,15 +127,18 @@ export default function Hero() {
   }, []);
 
   return (
+    <div ref={smoothWrapperRef} style={{ overflow: 'hidden' }}>
+      <div ref={smoothContentRef}>
     <section className="relative min-h-[100vh] flex items-center justify-center">
-      {/* Video cards scattered around the section */}
+      {/* Video cards — data-speed drives ScrollSmoother parallax depth per card */}
       {VIDEOS.map((src, i) => (
-        // outer: position only — GSAP animates opacity/scale/y here
+        // outer: position anchor + fade-in target
         <div
           key={src}
           ref={(el) => { videoRefs.current[i] = el; }}
           className="absolute opacity-0"
           style={VIDEO_CARDS[i].pos}
+          data-speed={VIDEO_CARDS[i].speed}
         >
           {/* inner: rotation + shadow — isolated from GSAP transforms */}
           <div
@@ -162,5 +182,7 @@ export default function Hero() {
 
       </div>
     </section>
+      </div>
+    </div>
   );
 }
