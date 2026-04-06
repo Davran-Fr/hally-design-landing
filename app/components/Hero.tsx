@@ -159,7 +159,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen max-w-[1400px] mx-auto flex items-center justify-center">
+    <section className="relative h-[650px] max-w-[1500px] mx-auto flex items-center justify-center">
       {/* Video cards — ScrollTrigger parallax depth per card */}
       {VIDEOS.map((src, i) => (
         <div
