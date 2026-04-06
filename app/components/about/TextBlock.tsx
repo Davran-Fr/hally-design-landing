@@ -12,7 +12,7 @@ interface Props {
 
 export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, dotRefs }: Props) {
   return (
-    <div ref={textBlockRef} className="md:w-[58%] shrink-0 flex flex-col">
+    <div ref={textBlockRef} className="md:w-[45%] shrink-0 flex flex-col">
       {/* Label with decorative line */}
       <div className="flex items-center gap-3 mb-4">
         <span

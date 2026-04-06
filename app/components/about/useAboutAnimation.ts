@@ -36,6 +36,7 @@ export function useAboutAnimation(refs: Refs) {
       duration: 40,
       ease: 'none',
       repeat: -1,
+      paused: true,
       onUpdate: () => {
         el.style.transform = `rotateX(${TILT_X}deg) rotateY(${state.ry}deg)`;
         cardRefs.current.forEach((card, i) => {
@@ -120,12 +121,18 @@ export function useAboutAnimation(refs: Refs) {
         start: 'top 80%',
         once: true,
         onEnter: () => {
+          // Text entrance
           gsap.timeline({ defaults: { ease: 'power3.out' } })
             .to(line,  { scaleX: 1, duration: 0.6 })
             .to(label, { opacity: 1, y: 0, duration: 0.5 }, '-=0.3')
             .to(wordEl, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2')
             .to(paraEl, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3')
             .to(dots,  { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 }, '-=0.3');
+
+          // Carousel entrance: fast spin → decelerate to normal
+          rotateTween.timeScale(20);
+          rotateTween.play();
+          gsap.to(rotateTween, { timeScale: 1, duration: 3, ease: 'power3.out' });
         },
       });
     }

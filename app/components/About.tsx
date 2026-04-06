@@ -25,7 +25,7 @@ export default function About() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen px-6 md:px-16 max-w-[1400px] mt-44 mx-auto flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden"
+      className="relative min-h-screen px-6 md:px- max-w-[1500px] mt-44 mx-auto flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden 2xl:overflow-visible"
     >
       <TextBlock
         textBlockRef={textBlockRef}
