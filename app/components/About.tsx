@@ -6,9 +6,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const RADIUS = 250;
-const CARD_W = 320;
-const CARD_H = 220;
+const RADIUS = 300;
+const CARD_W = 380;
+const CARD_H = 270;
 const TILT_X = -8;
 const CARD_COUNT = 5;
 
@@ -149,8 +149,6 @@ export default function About() {
     let spinTween: gsap.core.Tween | null = null;
     let imgTween: gsap.core.Tween | null = null;
 
-    const imgs = imgRefs.current.filter(Boolean) as HTMLImageElement[];
-
     const dots = dotRefs.current.filter(Boolean) as HTMLButtonElement[];
 
     const updateDots = (index: number) => {
@@ -189,20 +187,22 @@ export default function About() {
 
     const swapImages = (index: number) => {
       if (index === currentImages) return;
+      const prevIndex = currentImages;
       currentImages = index;
 
-      // Kill any in-progress image tween
       imgTween?.kill();
 
-      imgTween = gsap.to(imgs, {
-        opacity: 0,
-        duration: 0.15,
-        ease: 'power1.in',
-        onComplete: () => {
-          imgs.forEach((img, i) => { img.src = SLIDES[index].images[i]; });
-          imgTween = gsap.to(imgs, { opacity: 1, duration: 0.3, ease: 'power1.out' });
-        },
-      });
+      const prevImgs: HTMLImageElement[] = [];
+      const nextImgs: HTMLImageElement[] = [];
+      for (let i = 0; i < CARD_COUNT; i++) {
+        const prev = imgRefs.current[prevIndex * CARD_COUNT + i];
+        const next = imgRefs.current[index * CARD_COUNT + i];
+        if (prev) prevImgs.push(prev);
+        if (next) nextImgs.push(next);
+      }
+
+      gsap.to(prevImgs, { opacity: 0, duration: 0.3, ease: 'power1.in' });
+      imgTween = gsap.to(nextImgs, { opacity: 1, duration: 0.3, ease: 'power1.out' });
     };
 
     const decelerate = () => {
@@ -302,7 +302,7 @@ export default function About() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen px-6 md:px-16 max-w-[1400px] mt-20 mx-auto flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden"
+      className="relative h-screen px-6 md:px-16 max-w-[1400px] mt-44 mx-auto flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden"
     >
       {/* ── Left: text ── */}
       <div ref={textBlockRef} className="md:w-[58%] shrink-0 flex flex-col">
@@ -386,22 +386,27 @@ export default function About() {
                 transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                ref={(el) => { imgRefs.current[i] = el; }}
-                src={SLIDES[0].images[i]}
-                alt=""
-                draggable={false}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  borderRadius: 10,
-                  display: 'block',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-                  pointerEvents: 'none',
-                }}
-              />
+              {SLIDES.map((slide, si) => (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  key={si}
+                  ref={(el) => { imgRefs.current[si * CARD_COUNT + i] = el; }}
+                  src={slide.images[i]}
+                  alt=""
+                  draggable={false}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: 10,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                    pointerEvents: 'none',
+                    opacity: si === 0 ? 1 : 0,
+                  }}
+                />
+              ))}
             </div>
           ))}
         </div>
