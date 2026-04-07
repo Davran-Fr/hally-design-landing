@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import type { RefObject } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 import { CARDS, CARD_COUNT, SLIDES, TILT_X } from './constants';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 interface Refs {
   sectionRef:   RefObject<HTMLElement | null>;
@@ -26,8 +27,15 @@ export function useAboutAnimation(refs: Refs) {
   } = refs;
 
   useEffect(() => {
-    const el = cylinderRef.current;
-    if (!el) return;
+    // ── All null-checks up front so cleanup always runs ──
+    const el       = cylinderRef.current;
+    const wordEl   = wordRef.current;
+    const paraEl   = paraRef.current;
+    const line     = lineRef.current;
+    const label    = labelRef.current;
+    const wrap     = el?.parentElement ?? null;
+
+    if (!el || !wordEl || !paraEl) return;
 
     // ── Cylinder auto-rotate ──
     const state = { ry: 0 };
@@ -49,11 +57,10 @@ export function useAboutAnimation(refs: Refs) {
     });
 
     // ── Drag to rotate ──
-    const wrap = el.parentElement;
     let isDragging    = false;
     let dragStartX    = 0;
     let ryAtDragStart = 0;
-    let resumeTimer: ReturnType<typeof setTimeout>;
+    let resumeTimer: ReturnType<typeof setTimeout> | undefined;
 
     const onPointerDown = (e: PointerEvent) => {
       isDragging    = true;
@@ -90,54 +97,133 @@ export function useAboutAnimation(refs: Refs) {
 
     if (wrap) {
       wrap.style.cursor = 'grab';
-      wrap.addEventListener('pointerdown',  onPointerDown);
-      wrap.addEventListener('pointermove',  onPointerMove);
-      wrap.addEventListener('pointerup',    onPointerUp);
+      wrap.addEventListener('pointerdown',   onPointerDown);
+      wrap.addEventListener('pointermove',   onPointerMove);
+      wrap.addEventListener('pointerup',     onPointerUp);
       wrap.addEventListener('pointercancel', onPointerUp);
     }
 
-    // ── Scroll-driven slide controller ──
-    const wordEl = wordRef.current;
-    const paraEl = paraRef.current;
-    if (!wordEl || !paraEl) return;
-
+    // ── Slide state ──
     let current       = 0;
     let currentImages = 0;
     let pendingIndex  = -1;
-    let spinTween: gsap.core.Tween | null = null;
-    let imgTween:  gsap.core.Tween | null = null;
+    let spinTween:    gsap.core.Tween    | null = null;
+    let imgTween:     gsap.core.Tween    | null = null;
+    let activeTl:     gsap.core.Timeline | null = null; // slide transition TL
+    let entranceTl:   gsap.core.Timeline | null = null; // entrance TL (tracked separately)
+
+    let splitWord: InstanceType<typeof SplitText> | null = null;
+    let splitPara: InstanceType<typeof SplitText> | null = null;
 
     const dots = dotRefs.current.filter(Boolean) as HTMLButtonElement[];
 
+    // ── SplitText helpers ──
+
+    // Kill slide-transition timeline + any stray word tweens + entrance if still running
+    const killActive = () => {
+      if (entranceTl) {
+        // Snap line/label/dots to their final visible state before killing —
+        // otherwise they stay at opacity:0 / scaleX:0 forever if the entrance
+        // was interrupted before it could render a single frame.
+        entranceTl.progress(1);
+        entranceTl.kill();
+        entranceTl = null;
+      }
+      activeTl?.kill();
+      activeTl = null;
+      if (splitWord?.words) gsap.killTweensOf(splitWord.words);
+      if (splitPara?.words) gsap.killTweensOf(splitPara.words);
+    };
+
+    // Revert → set new text → re-split → animate words in.
+    // revert() MUST come before textContent change — SplitText.revert()
+    // restores the original text node, overwriting any change made before it.
+    const swapAndEnter = (index: number, fromY: string) => {
+      splitWord?.revert();
+      splitPara?.revert();
+      splitWord = null;
+      splitPara = null;
+
+      wordEl.textContent = SLIDES[index].word;
+      paraEl.textContent = SLIDES[index].text;
+
+      splitWord = new SplitText(wordEl, { type: 'words,lines', mask: 'words' });
+      splitPara = new SplitText(paraEl, { type: 'words,lines', mask: 'words' });
+
+      gsap.set([...splitWord.words, ...splitPara.words], { y: fromY });
+
+      activeTl = gsap.timeline()
+        .to(splitWord.words, { y: '0%', duration: 0.55, ease: 'power3.out', stagger: 0.055 })
+        .to(splitPara.words, { y: '0%', duration: 0.42, ease: 'power3.out', stagger: 0.014 }, '-=0.28');
+    };
+
+    // Exit current words, then swap content and enter new words.
+    // isForward true  → scroll down: exit ↑, enter from ↓
+    // isForward false → scroll up:   exit ↓, enter from ↑
+    const transitionSlide = (index: number, isForward: boolean) => {
+      const toY   = isForward ? '-110%' : '110%';
+      const fromY = isForward ? '110%'  : '-110%';
+
+      if (splitWord?.words.length && splitPara?.words.length) {
+        activeTl = gsap.timeline({ onComplete: () => swapAndEnter(index, fromY) })
+          .to(splitWord.words, { y: toY, duration: 0.26, ease: 'power2.in', stagger: 0.016 })
+          .to(splitPara.words, { y: toY, duration: 0.20, ease: 'power2.in', stagger: 0.010 }, '<0.04');
+      } else {
+        swapAndEnter(index, fromY);
+      }
+    };
+
     // ── Entrance animation ──
-    const line  = lineRef.current;
-    const label = labelRef.current;
     if (textBlockRef.current && line && label) {
-      gsap.set([label, wordEl, paraEl, ...dots], { opacity: 0, y: 30 });
+      // Split once; capture word arrays locally so the runEntrance closure
+      // is not affected if splitWord/splitPara change before it fires.
+      splitWord = new SplitText(wordEl, { type: 'words,lines', mask: 'words' });
+      splitPara = new SplitText(paraEl, { type: 'words,lines', mask: 'words' });
+
+      const entryWordEls = [...splitWord.words];
+      const entryParaEls = [...splitPara.words];
+
+      gsap.set([label, ...dots], { opacity: 0, y: 30 });
       gsap.set(line, { scaleX: 0 });
+      gsap.set([...entryWordEls, ...entryParaEls], { y: '110%' });
+
+      // Guard prevents double-firing if both ScrollTrigger and the
+      // immediate-check below would otherwise both call runEntrance.
+      let entranceHasFired = false;
+      const runEntrance = () => {
+        if (entranceHasFired) return;
+        entranceHasFired = true;
+
+        entranceTl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+          .to(line,         { scaleX: 1, duration: 0.6 })
+          .to(label,        { opacity: 1, y: 0, duration: 0.5 },          '-=0.3')
+          .to(entryWordEls, { y: '0%', duration: 0.62, stagger: 0.06 },   '-=0.2')
+          .to(entryParaEls, { y: '0%', duration: 0.48, stagger: 0.014 },  '-=0.38')
+          .to(dots,         { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 }, '-=0.28');
+
+        // Carousel entrance: fast spin → decelerate to normal speed
+        rotateTween.timeScale(20);
+        rotateTween.play();
+        gsap.to(rotateTween, { timeScale: 1, duration: 3, ease: 'power3.out' });
+      };
 
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top 80%',
         once: true,
-        onEnter: () => {
-          // Text entrance
-          gsap.timeline({ defaults: { ease: 'power3.out' } })
-            .to(line,  { scaleX: 1, duration: 0.6 })
-            .to(label, { opacity: 1, y: 0, duration: 0.5 }, '-=0.3')
-            .to(wordEl, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2')
-            .to(paraEl, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3')
-            .to(dots,  { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 }, '-=0.3');
-
-          // Carousel entrance: fast spin → decelerate to normal
-          rotateTween.timeScale(20);
-          rotateTween.play();
-          gsap.to(rotateTween, { timeScale: 1, duration: 3, ease: 'power3.out' });
-        },
+        onEnter: runEntrance,
       });
+
+      // onEnter only fires when scrolling down into view — it never fires
+      // if the page is refreshed while the section is already visible or
+      // scrolled past. Detect that case and run entrance immediately.
+      const rect = sectionRef.current?.getBoundingClientRect();
+      if (rect && rect.top < window.innerHeight * 0.8) {
+        runEntrance();
+      }
     }
 
-    // ── Helpers ──
+    // ── Dot indicators ──
     const updateDots = (index: number) => {
       dots.forEach((dot, i) => {
         gsap.to(dot, {
@@ -149,26 +235,25 @@ export function useAboutAnimation(refs: Refs) {
       });
     };
 
+    // ── Image swap ──
     const swapImages = (index: number) => {
       if (index === currentImages) return;
       const prevIndex = currentImages;
       currentImages = index;
-
       imgTween?.kill();
-
       const prevImgs: HTMLImageElement[] = [];
       const nextImgs: HTMLImageElement[] = [];
       for (let i = 0; i < CARD_COUNT; i++) {
         const prev = imgRefs.current[prevIndex * CARD_COUNT + i];
-        const next = imgRefs.current[index  * CARD_COUNT + i];
+        const next = imgRefs.current[index    * CARD_COUNT + i];
         if (prev) prevImgs.push(prev);
         if (next) nextImgs.push(next);
       }
-
       gsap.to(prevImgs, { opacity: 0, duration: 0.3, ease: 'power1.in' });
       imgTween = gsap.to(nextImgs, { opacity: 1, duration: 0.3, ease: 'power1.out' });
     };
 
+    // ── Cylinder decelerate ──
     const decelerate = () => {
       spinTween?.kill();
       spinTween = gsap.to(rotateTween, {
@@ -185,16 +270,18 @@ export function useAboutAnimation(refs: Refs) {
       });
     };
 
+    // ── Slide controller ──
     const goTo = (index: number) => {
       if (index === current) return;
 
+      const isForward = index > current;
+
+      // Fast-spin path: skip long exit, just swap and enter
       if (rotateTween.timeScale() > 2) {
         pendingIndex = index;
         current = index;
-        gsap.killTweensOf([wordEl, paraEl]);
-        wordEl.textContent = SLIDES[index].word;
-        paraEl.textContent = SLIDES[index].text;
-        gsap.fromTo([wordEl, paraEl], { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.3 });
+        killActive();
+        swapAndEnter(index, isForward ? '110%' : '-110%');
         swapImages(index);
         updateDots(index);
         return;
@@ -204,22 +291,8 @@ export function useAboutAnimation(refs: Refs) {
       pendingIndex = -1;
       updateDots(index);
 
-      gsap.killTweensOf([wordEl, paraEl]);
-      gsap.to([wordEl, paraEl], {
-        opacity: 0,
-        y: -18,
-        duration: 0.2,
-        ease: 'power2.in',
-        onComplete: () => {
-          wordEl.textContent = SLIDES[index].word;
-          paraEl.textContent = SLIDES[index].text;
-          gsap.fromTo(
-            [wordEl, paraEl],
-            { opacity: 0, y: 18 },
-            { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' },
-          );
-        },
-      });
+      killActive();
+      transitionSlide(index, isForward);
 
       spinTween?.kill();
       spinTween = gsap.to(rotateTween, {
@@ -247,15 +320,22 @@ export function useAboutAnimation(refs: Refs) {
       },
     });
 
+    // ── Cleanup ──
     return () => {
       rotateTween.kill();
       spinTween?.kill();
       imgTween?.kill();
+      activeTl?.kill();
+      entranceTl?.kill();
+      splitWord?.revert();
+      splitPara?.revert();
       clearTimeout(resumeTimer);
-      wrap?.removeEventListener('pointerdown',   onPointerDown);
-      wrap?.removeEventListener('pointermove',   onPointerMove);
-      wrap?.removeEventListener('pointerup',     onPointerUp);
-      wrap?.removeEventListener('pointercancel', onPointerUp);
+      if (wrap) {
+        wrap.removeEventListener('pointerdown',   onPointerDown);
+        wrap.removeEventListener('pointermove',   onPointerMove);
+        wrap.removeEventListener('pointerup',     onPointerUp);
+        wrap.removeEventListener('pointercancel', onPointerUp);
+      }
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps

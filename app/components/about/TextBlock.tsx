@@ -31,7 +31,7 @@ export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, d
       <h2 className="relative">
         <span
           ref={wordRef}
-          className="text-7xl md:text-8xl font-bold text-brand block leading-[1.05]"
+          className="text-7xl md:text-8xl 2xl:9xl font-bold text-brand block leading-[1.05]"
         >
           {SLIDES[0].word}
         </span>
