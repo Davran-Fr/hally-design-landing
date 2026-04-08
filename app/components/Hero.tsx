@@ -19,6 +19,8 @@ const VIDEOS = [
   '/video/gallery.webm',
   '/video/gallery2.webm',
   '/video/lighting1.webm',
+  '/video/gallery6.webm',
+  '/video/gallery7.webm',
 ];
 
 type CardConfig = {
@@ -28,6 +30,22 @@ type CardConfig = {
   opacity: number;
   speed: number;
 };
+
+// Entry vectors: each card slides in from the edge nearest its resting position
+// Matches card order in VIDEOS / VIDEO_CARDS arrays (11 entries)
+const ENTRY_VECTORS: { x: number; y: number }[] = [
+  { x: -120, y: -60  }, // 0  top-left  → from top-left
+  { x: -80,  y:  0   }, // 1  left-mid ghost → from left
+  { x:   0,  y: -80  }, // 2  top-center → from top
+  { x:  120, y: -60  }, // 3  top-right → from top-right
+  { x: -100, y:  0   }, // 4  left-mid → from left
+  { x:  100, y:  0   }, // 5  right-mid → from right
+  { x:   0,  y:  100 }, // 6  bottom-center → from bottom
+  { x:  -80, y:  100 }, // 7  bottom-left → from bottom-left
+  { x:   80, y:  100 }, // 8  bottom-right → from bottom-right
+  { x: -100, y:  40  }, // 9  bottom-left edge → from left
+  { x:  100, y:   20 }, // 10 right-lower → from right
+];
 
 // Desktop — organic scatter, varied sizes, slight tilts, depth via opacity
 // opacity: 1 = featured | 0.5 = supporting | 0.1 = ghostly
@@ -42,6 +60,8 @@ const VIDEO_CARDS_DESKTOP: CardConfig[] = [
   { pos: { top: '77%',  left: 'calc(50% - 8px)' }, size: 'w-42 h-32', rotate: '1.5deg',  opacity: 0.5, speed: 0.70 },
   { pos: { bottom: '-10%', left: '15%' },           size: 'w-62 h-52', rotate: '-1.5deg', opacity: 1,   speed: 0.75 },
   { pos: { bottom: '-20%', right: '2%' },           size: 'w-62 h-52', rotate: '2deg',    opacity: 1,   speed: 0.80 },
+  { pos: { bottom: '0%',    left: '-5%' },           size: 'w-36 h-28', rotate: '-1.5deg', opacity: 0.5, speed: 0.55 },
+  { pos: { top: '60%',    right: '-5%' },           size: 'w-42 h-32', rotate: '1deg',    opacity: 0.15, speed: 0.65 },
 ];
 
 // Mobile — cards hug the edges/corners, centre text zone stays clear
@@ -56,11 +76,14 @@ const VIDEO_CARDS_MOBILE: CardConfig[] = [
   { pos: { top: '74%',   left: '-4%'   }, size: 'w-24 h-16', rotate: '1.5deg',  opacity: 0.5,  speed: 0.70 }, // left rail, lower
   { pos: { bottom: '-4%', left: '5%'   }, size: 'w-36 h-28', rotate: '-1.5deg', opacity: 1,    speed: 0.75 }, // bottom-left corner
   { pos: { bottom: '-7%', right: '-3%' }, size: 'w-36 h-28', rotate: '2deg',    opacity: 1,    speed: 0.80 }, // bottom-right corner
+  { pos: { top: '34%',  right: '-4%' }, size: 'w-24 h-16', rotate: '-1deg',   opacity: 0.15, speed: 0.60 }, // right rail, gap filler
+  { pos: { top: '62%',  left: '-4%'  }, size: 'w-24 h-16', rotate: '1.5deg',  opacity: 0.15, speed: 0.65 }, // left rail, gap filler
 ];
 
 export default function Hero() {
   const wordRef     = useRef<HTMLSpanElement>(null);
   const videoRefs   = useRef<(HTMLDivElement | null)[]>([]);
+  const mouseRefs   = useRef<(HTMLDivElement | null)[]>([]);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -80,17 +103,18 @@ export default function Hero() {
     videoRefs.current.forEach((el, i) => {
       if (!el) return;
 
-      // fade-in
+      // fade-in from directional entry vector
       gsap.fromTo(
         el,
-        { opacity: 0, scale: 0.92, y: 12 },
+        { opacity: 0, scale: 0.88, x: ENTRY_VECTORS[i].x, y: ENTRY_VECTORS[i].y },
         {
           opacity: VIDEO_CARDS[i].opacity,
           scale: 1,
+          x: 0,
           y: 0,
-          duration: 0.9,
+          duration: 1.1,
           ease: 'power3.out',
-          delay: 0.4 + i * 0.18,
+          delay: 0.3 + i * 0.14,
         }
       );
 
@@ -110,6 +134,39 @@ export default function Hero() {
 
     return () => triggers.forEach((t) => t.kill());
   }, []);
+
+  // Mouse parallax — each card drifts toward the cursor, depth via speed
+  useEffect(() => {
+    if (isMobile) {
+      mouseRefs.current.forEach((el) => { if (el) gsap.set(el, { x: 0, y: 0 }); });
+      return;
+    }
+
+    const cards = VIDEO_CARDS_DESKTOP; // desktop-only feature
+
+    const setters = mouseRefs.current.map((el) =>
+      el
+        ? {
+            x: gsap.quickTo(el, 'x', { duration: 0.65, ease: 'power2.out' }),
+            y: gsap.quickTo(el, 'y', { duration: 0.65, ease: 'power2.out' }),
+          }
+        : null
+    );
+
+    const onMove = (e: MouseEvent) => {
+      const mx = e.clientX / window.innerWidth  - 0.5; // -0.5 → 0.5
+      const my = e.clientY / window.innerHeight - 0.5;
+
+      cards.forEach((card, i) => {
+        const strength = card.speed * 20 + 10; // ~15–27 px at screen edges
+        setters[i]?.x(mx * strength);
+        setters[i]?.y(my * strength);
+      });
+    };
+
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
+  }, [isMobile]);
 
   // Cycling word animation
   useEffect(() => {
@@ -159,7 +216,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[650px] max-w-[1500px] mx-auto flex items-center justify-center">
+    <section className="relative h-[650px] 2xl:h-[1000px] max-w-[1500px] mx-auto mb-30 2xl:mb-0 flex items-center justify-center">
       {/* Video cards — ScrollTrigger parallax depth per card */}
       {VIDEOS.map((src, i) => (
         <div
@@ -168,6 +225,8 @@ export default function Hero() {
           className="absolute opacity-0"
           style={VIDEO_CARDS[i].pos}
         >
+          {/* mouse parallax layer — isolated from scroll parallax on outer div */}
+          <div ref={(el) => { mouseRefs.current[i] = el; }}>
           {/* inner: rotation + shadow — isolated from GSAP transforms */}
           <div
             className={`${VIDEO_CARDS[i].size} rounded-2xl overflow-hidden shadow-[0_8px_28px_rgba(0,0,0,0.10)]`}
@@ -182,16 +241,17 @@ export default function Hero() {
               className="w-full h-full object-cover"
             />
           </div>
+          </div>{/* /mouse parallax layer */}
         </div>
       ))}
 
       {/* Main text — above videos */}
-      <div className="relative z-10 flex flex-col items-center gap-4">
+      <div className="relative z-10 flex flex-col items-center gap-10">
 
 
         {/* Logo row */}
         <div className="flex items-baseline gap-4 pl-20">
-          <h1 className="text-9xl text-brand font-black shrink-0">Hally</h1>
+          <h1 className="text-9xl 2xl:text-[175px] text-brand font-black shrink-0">Hally</h1>
         {/* Description above logo */}
           <div className="overflow-hidden w-[220px]">
             <p
@@ -202,7 +262,7 @@ export default function Hero() {
             </p>
           </div>
         </div>
-         <p className="max-w-[500px] text-center text-lg  font-medium leading-[1.9] tracking-[0.02em] text-neutral-400 select-none">
+         <p className="max-w-[500px] 2xl:max-w-[650px] text-center text-lg  2xl:text-2xl font-medium leading-[1.9] tracking-[0.02em] text-neutral-400 select-none">
           We curate art, shape environments, and command light —
           three disciplines united by a single belief that every space
           has the power to leave a lasting impression.

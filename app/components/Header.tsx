@@ -31,8 +31,8 @@ export default function Header() {
       {/* ── Header ── */}
       <header className={`
         fixed top-2.5 left-1/2 max-w-[350px] font-cormorant -translate-x-1/2 z-50
-        w-[calc(100%-2rem)] bg-white/50 border border-brand/50
-        backdrop-blur-2xl rounded-full overflow-hidden
+        w-[calc(100%-2rem)] bg-brand/20  border-brand/50
+        backdrop-blur-2xl rounded-xl overflow-hidden
         transition-all duration-500
         ${scrolled ? 'shadow-[0_8px_40px_rgba(0,0,0,0.18)]' : ''}
       `}>
@@ -49,7 +49,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center h-full px-4 rounded-full bg-brand text-white font-medium hover:bg-brand-dark text-xs tracking-[0.14em] transition-colors duration-200"
+                className="flex items-center h-full px-4 rounded-lg bg-white text-brand border-[1px border-brand font-medium hover:bg-brand/90 hover:text-white text-xs tracking-[0.14em] transition-colors duration-200"
               >
                 {link.label}
               </Link>

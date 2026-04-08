@@ -21,7 +21,7 @@ export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, d
         />
         <span
           ref={labelRef}
-          className="text-xs tracking-[0.22em] uppercase text-brand font-semibold"
+          className="text-xs 2xl:text-xl tracking-[0.22em] uppercase text-brand font-semibold"
         >
           About
         </span>
@@ -31,7 +31,7 @@ export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, d
       <h2 className="relative">
         <span
           ref={wordRef}
-          className="text-7xl md:text-8xl font-bold text-brand block leading-[1.05]"
+          className="text-7xl md:text-8xl 2xl:text-[175px] font-bold text-brand block leading-[1.05]"
         >
           {SLIDES[0].word}
         </span>
@@ -40,7 +40,7 @@ export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, d
       {/* Description */}
       <p
         ref={paraRef}
-        className="text-neutral-600 font-medium leading-[1.9] max-w-lg text-lg md:text-xl mt-8"
+        className="text-neutral-600 font-medium leading-[1.9] max-w-lg 2xl:max-w-3xl text-lg md:text-xl 2xl:text-2xl mt-8"
       >
         {SLIDES[0].text}
       </p>
