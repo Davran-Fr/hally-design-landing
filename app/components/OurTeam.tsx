@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const TEAM_SLIDES = [
   '/team/team.webp',
@@ -13,19 +14,24 @@ const TEAM_SLIDES = [
 ];
 
 export default function OurTeam() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const imageRefs  = useRef<(HTMLDivElement | null)[]>([]);
-  const dotRefs    = useRef<(HTMLButtonElement | null)[]>([]);
-  const textRef    = useRef<HTMLDivElement>(null);
+  const sectionRef   = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imageRefs    = useRef<(HTMLDivElement | null)[]>([]);
+  const dotRefs      = useRef<(HTMLButtonElement | null)[]>([]);
+  const lineLeftRef  = useRef<HTMLSpanElement>(null);
+  const lineRightRef = useRef<HTMLSpanElement>(null);
+  const labelRef     = useRef<HTMLSpanElement>(null);
+  const headingRef   = useRef<HTMLHeadingElement>(null);
+  const paraRef      = useRef<HTMLParagraphElement>(null);
+
   const [active, setActive] = useState(0);
-  const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const prevRef = useRef(0);
-  const isFirst = useRef(true);
-  const total = TEAM_SLIDES.length;
+  const autoRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevRef  = useRef(0);
+  const isFirst  = useRef(true);
+  const total    = TEAM_SLIDES.length;
 
   /* ── Clip-path wipe + inner parallax ── */
   useEffect(() => {
-    // First render — show slide 0, hide the rest
     if (isFirst.current) {
       isFirst.current = false;
       imageRefs.current.forEach((el, i) => {
@@ -38,14 +44,13 @@ export default function OurTeam() {
       return;
     }
 
-    const prev = prevRef.current;
+    const prev  = prevRef.current;
     prevRef.current = active;
     if (active === prev) return;
 
     const newEl = imageRefs.current[active];
     const oldEl = imageRefs.current[prev];
 
-    // New slide wipes in from the right
     if (newEl) {
       const img = newEl.querySelector('img');
       gsap.set(newEl, { zIndex: 2 });
@@ -64,7 +69,6 @@ export default function OurTeam() {
           },
         },
       );
-      // Inner parallax shift
       if (img) {
         gsap.fromTo(
           img,
@@ -74,12 +78,10 @@ export default function OurTeam() {
       }
     }
 
-    // Old slide stays visible underneath during wipe
     if (oldEl) {
       gsap.set(oldEl, { zIndex: 1, clipPath: 'inset(0 0% 0 0)' });
     }
 
-    // Dots
     dotRefs.current.forEach((dot, i) => {
       if (!dot) return;
       gsap.to(dot, {
@@ -91,25 +93,85 @@ export default function OurTeam() {
     });
   }, [active, total]);
 
-  /* ── Entrance (ScrollTrigger, once) ── */
+  /* ── Scroll-driven container shrink: full-width → padded + rounded ── */
   useEffect(() => {
-    const trig = ScrollTrigger.create({
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Start state: edge-to-edge, no radius
+    gsap.set(container, { marginLeft: 0, marginRight: 0, borderRadius: 0 });
+
+    const trig = gsap.fromTo(
+      container,
+      { marginLeft: 0, marginRight: 0, borderRadius: 0 },
+      {
+        marginLeft: 40,   // px-10
+        marginRight: 40,
+        borderRadius: 24, // rounded-3xl
+        ease: 'none',
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'bottom bottom',
+          end:   'bottom bottom',
+          scrub: 1.5,
+        },
+      },
+    );
+
+    return () => {
+      trig.scrollTrigger?.kill();
+      trig.kill();
+    };
+  }, []);
+
+  /* ── Entrance — SplitText mask reveal ── */
+  useEffect(() => {
+    const lineL   = lineLeftRef.current;
+    const lineR   = lineRightRef.current;
+    const label   = labelRef.current;
+    const heading = headingRef.current;
+    const para    = paraRef.current;
+    if (!lineL || !lineR || !label || !heading || !para) return;
+
+    gsap.set([lineL, lineR], { scaleX: 0 });
+    gsap.set(label, { opacity: 0, y: 20 });
+
+    const splitH    = new SplitText(heading, { type: 'words,lines', mask: 'words' });
+    const splitP    = new SplitText(para,    { type: 'words,lines', mask: 'words' });
+    const headWords = [...splitH.words];
+    const paraWords = [...splitP.words];
+    gsap.set([...headWords, ...paraWords], { y: '110%' });
+
+    let hasFired = false;
+    let tl: gsap.core.Timeline | null = null;
+
+    const runEntrance = () => {
+      if (hasFired) return;
+      hasFired = true;
+
+      tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .to([lineL, lineR], { scaleX: 1, duration: 0.55 })
+        .to(label,          { opacity: 1, y: 0, duration: 0.45 },        '-=0.25')
+        .to(headWords,      { y: '0%', duration: 0.62, stagger: 0.06 },  '-=0.2')
+        .to(paraWords,      { y: '0%', duration: 0.48, stagger: 0.014 }, '-=0.38');
+    };
+
+    const trigger = ScrollTrigger.create({
       trigger: sectionRef.current,
       start: 'top 80%',
       once: true,
-      onEnter: () => {
-        if (textRef.current) {
-          gsap.from(textRef.current.children, {
-            opacity: 0,
-            y: 30,
-            duration: 0.8,
-            stagger: 0.14,
-            ease: 'power3.out',
-          });
-        }
-      },
+      onEnter: runEntrance,
     });
-    return () => trig.kill();
+
+    const rect = sectionRef.current?.getBoundingClientRect();
+    if (rect && rect.top < window.innerHeight * 0.8) runEntrance();
+
+    return () => {
+      trigger.kill();
+      tl?.kill();
+      splitH.revert();
+      splitP.revert();
+    };
   }, []);
 
   /* ── Auto-advance ── */
@@ -125,28 +187,49 @@ export default function OurTeam() {
   }, [total]);
 
   return (
-    <section ref={sectionRef} className="w-full max-w-[1500px] mx-auto px-6 py-30">
-      {/* Section header */}
-      <div ref={textRef} className="text-center mb-10">
+    // w-full — no horizontal constraints here; text gets its own wrapper
+    <section ref={sectionRef} className="w-full pb-30">
+
+      {/* Text header — constrained to match site layout */}
+      <div className="max-w-[1500px] mx-auto px-6 text-center mb-10">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <span className="inline-block w-10 h-[2px] bg-brand/30" />
-          <span className="text-xs tracking-[0.22em] uppercase text-brand/70 font-semibold">
+          <span
+            ref={lineLeftRef}
+            className="inline-block w-10 h-[2px] bg-brand/30 origin-right"
+          />
+          <span
+            ref={labelRef}
+            className="text-xs 2xl:text-xl tracking-[0.22em] uppercase text-brand/70 font-semibold"
+          >
             Our Team
           </span>
-          <span className="inline-block w-10 h-[2px] bg-brand/30" />
+          <span
+            ref={lineRightRef}
+            className="inline-block w-10 h-[2px] bg-brand/30 origin-left"
+          />
         </div>
 
-        <h2 className="text-5xl md:text-8xl font-bold text-brand leading-[1.05]">
+        <h2
+          ref={headingRef}
+          className="text-5xl md:text-8xl 2xl:text-[175px] font-bold text-brand leading-[1.05]"
+        >
           Creative Minds
         </h2>
 
-        <p className="text-neutral-600 font-medium leading-[1.9] max-w-xl mx-auto text-lg md:text-xl mt-4">
+        <p
+          ref={paraRef}
+          className="text-neutral-600 font-medium leading-[1.9] max-w-xl mx-auto text-lg md:text-xl mt-4"
+        >
           Passionate creators who transform concepts into
           unforgettable experiences.
         </p>
       </div>
 
-      <div className="relative h-[500px] md:h-[800px] rounded-3xl overflow-hidden">
+      {/* Image container — starts edge-to-edge, GSAP animates margin + radius */}
+      <div
+        ref={containerRef}
+        className="relative h-[500px] md:h-[850px] 2xl:h-[1500px] overflow-hidden"
+      >
         {/* Slides */}
         {TEAM_SLIDES.map((src, i) => (
           <div

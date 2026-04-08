@@ -216,7 +216,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[650px] max-w-[1500px] mx-auto mb-30 flex items-center justify-center">
+    <section className="relative h-[650px] 2xl:h-[1000px] max-w-[1500px] mx-auto mb-30 2xl:mb-0 flex items-center justify-center">
       {/* Video cards — ScrollTrigger parallax depth per card */}
       {VIDEOS.map((src, i) => (
         <div
@@ -246,12 +246,12 @@ export default function Hero() {
       ))}
 
       {/* Main text — above videos */}
-      <div className="relative z-10 flex flex-col items-center gap-4">
+      <div className="relative z-10 flex flex-col items-center gap-10">
 
 
         {/* Logo row */}
         <div className="flex items-baseline gap-4 pl-20">
-          <h1 className="text-9xl text-brand font-black shrink-0">Hally</h1>
+          <h1 className="text-9xl 2xl:text-[175px] text-brand font-black shrink-0">Hally</h1>
         {/* Description above logo */}
           <div className="overflow-hidden w-[220px]">
             <p
@@ -262,7 +262,7 @@ export default function Hero() {
             </p>
           </div>
         </div>
-         <p className="max-w-[500px] text-center text-lg  font-medium leading-[1.9] tracking-[0.02em] text-neutral-400 select-none">
+         <p className="max-w-[500px] 2xl:max-w-[650px] text-center text-lg  2xl:text-2xl font-medium leading-[1.9] tracking-[0.02em] text-neutral-400 select-none">
           We curate art, shape environments, and command light —
           three disciplines united by a single belief that every space
           has the power to leave a lasting impression.
