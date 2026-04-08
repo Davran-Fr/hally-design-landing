@@ -10,6 +10,9 @@ export default function Home() {
       <CylindricalCarousel />
       <OurTeam />
       <FAQ />
+      <div className='h-screen'>
+        new section
+      </div>
     </main>
   );
 }

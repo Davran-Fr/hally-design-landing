@@ -25,7 +25,7 @@ export default function About() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen px-6 md:px- max-w-[1800px] mt- mx-auto flex flex-col md:flex-row items-center justify-center gap-16"
+      className="relative min-h-screen px-6 md:px- max-w-[1800px] mx-auto flex flex-col md:flex-row items-center justify-center gap-16"
     >
       <TextBlock
         textBlockRef={textBlockRef}

@@ -188,7 +188,7 @@ export default function OurTeam() {
 
   return (
     // w-full — no horizontal constraints here; text gets its own wrapper
-    <section ref={sectionRef} className="w-full pb-30">
+    <section ref={sectionRef} className="w-full pb-30 pt-20">
 
       {/* Text header — constrained to match site layout */}
       <div className="max-w-[1500px] mx-auto px-6 text-center mb-10">
