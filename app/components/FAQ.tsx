@@ -57,125 +57,135 @@ type Item = (typeof ITEMS)[number];
 interface RowProps {
   item: Item;
   isOpen: boolean;
-  isHovered: boolean;
   onToggle: () => void;
-  onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-function Row({ item, isOpen, isHovered, onToggle, onMouseEnter }: RowProps) {
+function Row({ item, isOpen, onToggle }: RowProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
   const plusRef = useRef<HTMLSpanElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const didMount = useRef(false);
-  const prevHovered = useRef(false);
-  // Always-current ref so close animation can read hover state at completion time
-  const isHoveredRef = useRef(isHovered);
-  useEffect(() => { isHoveredRef.current = isHovered; }, [isHovered]);
+  const hoverRef = useRef<HTMLDivElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const prevOpen = useRef(isOpen);
 
   useLayoutEffect(() => {
     gsap.set(bodyRef.current, { height: 0 });
+    gsap.set(hoverRef.current, { yPercent: 100 });
   }, []);
 
-  // Hover color changes driven by parent's hoveredIndex
-  useEffect(() => {
+  const handleMouseEnter = () => {
     if (isOpen) return;
-    if (isHovered === prevHovered.current) return;
+    gsap.killTweensOf(hoverRef.current);
+    gsap.to(hoverRef.current, { yPercent: 0, duration: 0.4, ease: 'power3.out' });
+    gsap.to([titleRef.current, plusRef.current], { color: '#ffffff', duration: 0.28, ease: 'power2.out' });
+  };
 
-    gsap.killTweensOf([titleRef.current, plusRef.current]);
+  const handleMouseLeave = () => {
+    if (isOpen) return;
+    gsap.killTweensOf(hoverRef.current);
+    gsap.to(hoverRef.current, { yPercent: 100, duration: 0.35, ease: 'power3.in' });
+    gsap.to([titleRef.current, plusRef.current], {
+      color: '#000000', duration: 0.28, ease: 'power2.out',
+      onComplete() { gsap.set([titleRef.current, plusRef.current], { clearProps: 'color' }); },
+    });
+  };
 
-    if (isHovered) {
-      gsap.to([titleRef.current, plusRef.current], { color: '#ffffff', duration: 0.28, ease: 'power2.out' });
-    } else {
-      gsap.to(titleRef.current, {
-        color: '#000000', duration: 0.3, ease: 'power2.out',
-        onComplete: () => {gsap.set(titleRef.current, { clearProps: 'color' })},
-      });
-      gsap.to(plusRef.current, {
-        color: '#000000', duration: 0.3, ease: 'power2.out',
-        onComplete: () => {gsap.set(plusRef.current, { clearProps: 'color' })},
-      });
-    }
-    prevHovered.current = isHovered;
-  }, [isHovered, isOpen]);
-
-  // Open / close animation
   useEffect(() => {
-    if (!didMount.current) { didMount.current = true; return; }
+    if (prevOpen.current === isOpen) return;
+    prevOpen.current = isOpen;
 
-    gsap.killTweensOf([wrapRef.current, bodyRef.current, titleRef.current, plusRef.current, imgRef.current, textRef.current]);
+    tlRef.current?.kill();
+    gsap.killTweensOf([wrapRef.current, bodyRef.current, titleRef.current, plusRef.current, imgRef.current, textRef.current, hoverRef.current]);
 
     if (isOpen) {
-      gsap.timeline()
-        .to(plusRef.current, { rotation: 45, color: '#ffffff', duration: 0.32, ease: 'power2.out' }, 0)
-        .to(wrapRef.current, { backgroundColor: BRAND, duration: 0.48, ease: 'power2.inOut' }, 0.08)
-        .to(titleRef.current, { color: '#ffffff', duration: 0.28, ease: 'power2.out' }, 0.12)
-        .to(bodyRef.current, { height: 'auto', duration: 0.68, ease: 'power3.inOut' }, 0.22)
-        .fromTo(imgRef.current, { scale: 1.08, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.82, ease: 'power3.out' }, 0.5)
-        .fromTo(textRef.current, { y: 32, opacity: 0 }, { y: 0, opacity: 1, duration: 0.58, ease: 'power3.out' }, 0.66);
-    } else {
-      // Capture hover state NOW — after animation finishes, mouse may have moved
-      const wasHovered = isHoveredRef.current;
+      gsap.set(wrapRef.current, { backgroundColor: BRAND });
+      gsap.set(hoverRef.current, { yPercent: 100 });
 
-      gsap.timeline()
-        .to(textRef.current, { y: 16, opacity: 0, duration: 0.28, ease: 'power2.in' }, 0)
-        .to(imgRef.current, { opacity: 0, duration: 0.24, ease: 'power2.in' }, 0.04)
-        .to(bodyRef.current, { height: 0, duration: 0.52, ease: 'power3.inOut' }, 0.18)
+      tlRef.current = gsap.timeline()
+        .to(plusRef.current, { rotation: 45, color: '#ffffff', duration: 0.32, ease: 'power2.out' }, 0)
+        .to(titleRef.current, { color: '#ffffff', duration: 0.28, ease: 'power2.out' }, 0.04)
+        .to(bodyRef.current, { height: 'auto', duration: 0.68, ease: 'power3.inOut' }, 0.22)
+        .fromTo(imgRef.current, { scale: 1.08 }, { scale: 1, duration: 0.82, ease: 'power3.out' }, 0.5)
+        .fromTo(textRef.current, { y: 32 }, { y: 0, duration: 0.58, ease: 'power3.out' }, 0.66);
+    } else {
+      const stillHovered = wrapRef.current?.matches(':hover');
+
+      if (stillHovered) {
+        gsap.set(hoverRef.current, { yPercent: 0 });
+      }
+
+      const textColor = stillHovered ? '#ffffff' : '#000000';
+
+      tlRef.current = gsap.timeline()
+        .to(textRef.current, { y: 16, duration: 0.28, ease: 'power2.in' }, 0)
+        .to(bodyRef.current, { height: 0, duration: 0.52, ease: 'power3.inOut' }, 0.12)
         .to(wrapRef.current, {
           backgroundColor: 'rgba(0,0,0,0)', duration: 0.4, ease: 'power2.inOut',
-          onComplete: () => {gsap.set(wrapRef.current, { clearProps: 'backgroundColor' })},
+          onComplete() { gsap.set(wrapRef.current, { clearProps: 'backgroundColor' }); },
         }, 0.28)
-        // If mouse is still on this row: keep white; otherwise reset to black
         .to(titleRef.current, {
-          color: wasHovered ? '#ffffff' : '#000000',
-          duration: 0.32, ease: 'power2.out',
-          onComplete: () => { if (!wasHovered) gsap.set(titleRef.current, { clearProps: 'color' }); },
+          color: textColor, duration: 0.32, ease: 'power2.out',
+          onComplete() { if (!stillHovered) gsap.set(titleRef.current, { clearProps: 'color' }); },
         }, 0.28)
         .to(plusRef.current, {
-          rotation: 0,
-          color: wasHovered ? '#ffffff' : '#000000',
-          duration: 0.3, ease: 'power2.out',
-          onComplete: () => { if (!wasHovered) gsap.set(plusRef.current, { clearProps: 'color' }); },
+          rotation: 0, color: textColor, duration: 0.3, ease: 'power2.out',
+          onComplete() { if (!stillHovered) gsap.set(plusRef.current, { clearProps: 'color' }); },
         }, 0.28);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    return () => { tlRef.current?.kill(); };
+  }, []);
 
   return (
     <div
       ref={wrapRef}
       className="faq-row border-t rounded-3xl border-brand relative overflow-hidden"
-      onMouseEnter={onMouseEnter}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <button
+      <div
+        ref={hoverRef}
+        className="absolute inset-0 bg-brand rounded-3xl pointer-events-none"
+      />
+
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
-        className="relative z-10 w-full flex cursor-pointer items-center justify-between py-5 md:py-7 px-6 md:px-10 text-left"
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+        className="relative z-10 w-full cursor-pointer text-left"
         aria-expanded={isOpen}
       >
-        <span ref={titleRef} className="text-[clamp(2rem,5vw,3rem)] text-black tracking-tight leading-none">
-          {item.title}
-        </span>
-        <span
-          ref={plusRef}
-          className="text-black text-2xl font-thin ml-6 flex-shrink-0 inline-block origin-center select-none"
-          aria-hidden
-        >
-          +
-        </span>
-      </button>
+        <div className="flex items-center justify-between py-5 md:py-7 px-6 md:px-10">
+          <span ref={titleRef} className="text-[clamp(2rem,5vw,3rem)] text-black tracking-tight leading-none">
+            {item.title}
+          </span>
+          <span
+            ref={plusRef}
+            className="text-black text-2xl font-thin ml-6 flex-shrink-0 inline-block origin-center select-none"
+            aria-hidden
+          >
+            +
+          </span>
+        </div>
 
-      <div ref={bodyRef} className="relative z-10" style={{ overflow: 'hidden' }}>
-        <div className="grid grid-cols-1 md:grid-cols-[5fr_6fr] pb-10 md:pb-16 px-6 md:px-10 gap-8 md:gap-0">
-          <div ref={textRef} className="flex flex-col justify-between pr-0 md:pr-16" style={{ opacity: 0 }}>
-            <div>
-              <p className="text-white/60 text-base md:text-lg leading-relaxed max-w-md">{item.description}</p>
+        <div ref={bodyRef} style={{ overflow: 'hidden' }}>
+          <div className="grid grid-cols-1 md:grid-cols-[5fr_6fr] pb-10 md:pb-16 px-6 md:px-10 gap-8 md:gap-0">
+            <div ref={textRef} className="flex flex-col justify-between pr-0 md:pr-16">
+              <div>
+                <p className="text-white/60 text-base md:text-lg leading-relaxed max-w-md">{item.description}</p>
+              </div>
+              <p className="text-white/30 text-xs mt-10 tracking-[0.25em] uppercase">{item.tags}</p>
             </div>
-            <p className="text-white/30 text-xs mt-10 tracking-[0.25em] uppercase">{item.tags}</p>
-          </div>
 
-          <div ref={imgRef} className="relative h-56 rounded-3xl md:h-[440px] overflow-hidden" style={{ opacity: 0 }}>
-            <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 100vw, 55vw" className="object-cover" />
+            <div ref={imgRef} className="relative h-56 rounded-3xl md:h-[440px] overflow-hidden">
+              <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 100vw, 55vw" className="object-cover" />
+            </div>
           </div>
         </div>
       </div>
@@ -185,47 +195,10 @@ function Row({ item, isOpen, isHovered, onToggle, onMouseEnter }: RowProps) {
 
 export default function FAQ() {
   const [openId, setOpenId] = useState<string | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const followerRef = useRef<HTMLDivElement>(null);
-  const isFirstHover = useRef(true);
 
   const toggle = (id: string) => setOpenId(p => (p === id ? null : id));
-
-  const handleRowEnter = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
-    const row = e.currentTarget;
-    const follower = followerRef.current;
-    if (!follower) return;
-
-    const rowTop = row.offsetTop;
-    const rowHeight = row.offsetHeight;
-
-    gsap.killTweensOf(follower);
-
-    if (isFirstHover.current) {
-      // First entry: slide in from above the container
-      isFirstHover.current = false;
-      gsap.set(follower, { y: -rowHeight, height: rowHeight, opacity: 1 });
-      gsap.to(follower, { y: rowTop, duration: 0.55, ease: 'power3.out' });
-    } else {
-      // Moving between rows: chase to new position
-      gsap.to(follower, { y: rowTop, height: rowHeight, opacity: 1, duration: 0.45, ease: 'power3.out' });
-    }
-
-    setHoveredIndex(index);
-  };
-
-  const handleContainerLeave = () => {
-    const follower = followerRef.current;
-    if (!follower) return;
-    isFirstHover.current = true;
-    gsap.killTweensOf(follower);
-    // Fast fade — 0.12s so it disappears before the user perceives a delay
-    gsap.to(follower, { opacity: 0, duration: 0.12, ease: 'power2.in' });
-    setHoveredIndex(null);
-  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -254,26 +227,13 @@ export default function FAQ() {
           </h2>
         </div>
 
-        <div
-          ref={containerRef}
-          className="relative overflow-hidden"
-          onMouseLeave={handleContainerLeave}
-        >
-          {/* Single shared follower — chases between rows on hover */}
-          <div
-            ref={followerRef}
-            className="absolute left-0 right-0 bg-brand rounded-3xl pointer-events-none"
-            style={{ opacity: 0, top: 0, height: 0 }}
-          />
-
-          {ITEMS.map((item, index) => (
+        <div>
+          {ITEMS.map((item) => (
             <Row
               key={item.id}
               item={item}
               isOpen={openId === item.id}
-              isHovered={hoveredIndex === index}
               onToggle={() => toggle(item.id)}
-              onMouseEnter={(e) => handleRowEnter(e, index)}
             />
           ))}
           <div className="border-t border-white/10" />

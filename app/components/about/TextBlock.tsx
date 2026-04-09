@@ -12,7 +12,7 @@ interface Props {
 
 export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, dotRefs }: Props) {
   return (
-    <div ref={textBlockRef} className="md:w-[45%] shrink-0 flex flex-col">
+    <div ref={textBlockRef} className="md:w-[45%] 2xl:w-[50%]  shrink-0 flex flex-col">
       {/* Label with decorative line */}
       <div className="flex items-center gap-3 mb-4">
         <span
@@ -31,7 +31,7 @@ export function TextBlock({ textBlockRef, lineRef, labelRef, wordRef, paraRef, d
       <h2 className="relative">
         <span
           ref={wordRef}
-          className="text-7xl md:text-8xl 2xl:text-[175px] font-bold text-brand block leading-[1.05]"
+          className="text-7xl md:text-8xl 2xl:text-[175px]  font-bold text-brand block leading-[1.05]"
         >
           {SLIDES[0].word}
         </span>
