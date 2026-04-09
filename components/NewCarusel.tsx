@@ -319,37 +319,33 @@ export default function NewCarusel({
                   }}
                 >
                   {activeItem ? (
-                    <div style={{ animation: "fadeIn 0.3s ease" }}>
-                      {isImageItem(activeItem.item) ? (
-                        <>
-                          <img
-                            src={activeItem.item.src}
-                            alt={activeItem.item.title ?? ""}
-                            style={{
-                              maxWidth: 400,
-                              maxHeight: 280,
-                              objectFit: "cover",
-                              borderRadius: 4,
-                              display: "block",
-                              margin: "0 auto",
-                            }}
-                          />
-                          {activeItem.item.title && (
-                            <div
+                    <div style={{ animation: "fadeIn 0.35s ease" }}>
+                      {/* centerContent (from page) takes priority — shows featured card */}
+                      {centerContent ?? (
+                        isImageItem(activeItem.item) ? (
+                          <>
+                            <img
+                              src={activeItem.item.src}
+                              alt={activeItem.item.title ?? ""}
                               style={{
-                                marginTop: 12,
-                                fontSize: 20,
-                                fontWeight: 600,
-                                color: "#111",
-                                letterSpacing: "-0.02em",
+                                maxWidth: 200,
+                                backgroundColor: 'red',
+                                maxHeight: 280,
+                                objectFit: "cover",
+                                borderRadius: 4,
+                                display: "block",
+                                margin: "0 auto",
                               }}
-                            >
-                              {activeItem.item.title}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        activeItem.item as ReactNode
+                            />
+                            {activeItem.item.title && (
+                              <div style={{ marginTop: 12, fontSize: 20, fontWeight: 600, color: "#fff", letterSpacing: "-0.02em" }}>
+                                {activeItem.item.title}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          activeItem.item as ReactNode
+                        )
                       )}
                     </div>
                   ) : (

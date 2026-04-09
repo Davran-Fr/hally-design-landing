@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import NewCarusel from "@/components/NewCarusel";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -10,283 +11,157 @@ interface Project {
   title: string;
   category: string;
   year: string;
-  color: string;
+  image: string;
   accentColor: string;
   tags: string[];
 }
 
-// ── Data ───────────────────────────────────────────────────────────────────
+// ── Data — based on real renders in /public/carusel/ ───────────────────────
 
 const PROJECTS: Project[] = [
   {
     id: 1,
-    title: "Noir Atelier",
-    category: "Brand Identity",
+    title: "Marble Garden",
+    category: "Dining Room",
     year: "2024",
-    color: "#0D0D0D",
-    accentColor: "#C9A84C",
-    tags: ["Branding", "Typography", "Print"],
+    image: "/carusel/carusel.jpg",
+    accentColor: "#A89060",
+    tags: ["Dining", "Marble", "Top View"],
   },
   {
     id: 2,
-    title: "Bloom Studio",
-    category: "Web Design",
+    title: "Sage Retreat",
+    category: "Bedroom",
     year: "2024",
-    color: "#1A1A2E",
-    accentColor: "#E94560",
-    tags: ["UI/UX", "Motion", "React"],
+    image: "/carusel/carusel2.jpg",
+    accentColor: "#7A9E7E",
+    tags: ["Bedroom", "Sage Green", "Herringbone"],
   },
   {
     id: 3,
-    title: "Solaris",
-    category: "Product Design",
+    title: "Concrete Villa",
+    category: "Architecture",
     year: "2023",
-    color: "#0F2027",
-    accentColor: "#F7971E",
-    tags: ["Product", "3D", "Figma"],
+    image: "/carusel/carusel3.jpg",
+    accentColor: "#9EAAB4",
+    tags: ["Exterior", "Modern", "Minimalist"],
   },
   {
     id: 4,
-    title: "Arcane Labs",
-    category: "Digital Experience",
-    year: "2023",
-    color: "#16002E",
-    accentColor: "#A855F7",
-    tags: ["Interactive", "WebGL", "Three.js"],
+    title: "Taupe Studio",
+    category: "Living Room",
+    year: "2024",
+    image: "/carusel/carusel4.jpg",
+    accentColor: "#C4A882",
+    tags: ["Living", "Taupe", "Art Decor"],
   },
   {
     id: 5,
-    title: "Drift Magazine",
-    category: "Editorial Design",
-    year: "2023",
-    color: "#1C1917",
-    accentColor: "#84CC16",
-    tags: ["Editorial", "Grid", "Print"],
+    title: "Aqua Spa",
+    category: "Pool & Wellness",
+    year: "2024",
+    image: "/carusel/carusel5.jpg",
+    accentColor: "#4A90C4",
+    tags: ["Pool", "Spa", "Marble"],
   },
   {
     id: 6,
-    title: "Kova Systems",
-    category: "SaaS Dashboard",
-    year: "2024",
-    color: "#0A192F",
-    accentColor: "#64FFDA",
-    tags: ["Dashboard", "Data Viz", "UX"],
+    title: "Solar Bedroom",
+    category: "Bedroom",
+    year: "2023",
+    image: "/carusel/carusel6.jpg",
+    accentColor: "#C9A84C",
+    tags: ["Bedroom", "Gold", "Sunburst"],
   },
   {
     id: 7,
-    title: "Phantom Wave",
-    category: "Motion Design",
+    title: "Bloom Dining",
+    category: "Dining Room",
     year: "2024",
-    color: "#0E0E1A",
-    accentColor: "#818CF8",
-    tags: ["Motion", "AE", "Cinema 4D"],
+    image: "/carusel/carusel7.jpg",
+    accentColor: "#7CAE7A",
+    tags: ["Dining", "Floral", "White"],
   },
   {
     id: 8,
-    title: "Terra Forma",
-    category: "Packaging Design",
+    title: "Art Living",
+    category: "Living Room",
     year: "2023",
-    color: "#0F1A0A",
-    accentColor: "#86EFAC",
-    tags: ["Packaging", "Print", "3D"],
+    image: "/carusel/carusel8.jpg",
+    accentColor: "#B5A494",
+    tags: ["Living", "Art Chair", "Cotton"],
   },
   {
     id: 9,
-    title: "Void Market",
-    category: "E-Commerce",
+    title: "Crystal Lounge",
+    category: "Living Room",
     year: "2024",
-    color: "#1A0A0A",
-    accentColor: "#F87171",
-    tags: ["E-Commerce", "UI/UX", "Next.js"],
+    image: "/carusel/carusel9.jpg",
+    accentColor: "#C4973A",
+    tags: ["Lounge", "Walnut", "Crystal"],
   },
   {
     id: 10,
-    title: "Lumen AR",
-    category: "Augmented Reality",
+    title: "Walnut Hall",
+    category: "Living Room",
     year: "2024",
-    color: "#001A1A",
-    accentColor: "#22D3EE",
-    tags: ["AR", "Unity", "Spatial UI"],
+    image: "/carusel/carusel10.jpg",
+    accentColor: "#A07840",
+    tags: ["Living", "Dark Wood", "Chandelier"],
   },
   {
     id: 11,
-    title: "Celeste Type",
-    category: "Type Design",
+    title: "Emerald Kitchen",
+    category: "Kitchen",
     year: "2023",
-    color: "#12001A",
-    accentColor: "#D946EF",
-    tags: ["Typography", "Variable Font", "Print"],
+    image: "/carusel/carusel11.jpg",
+    accentColor: "#3A7D5A",
+    tags: ["Kitchen", "Emerald", "Gold"],
   },
   {
     id: 12,
-    title: "Obsidian OS",
-    category: "UI System",
+    title: "Graphite Atelier",
+    category: "Showroom",
     year: "2024",
-    color: "#0A0A0A",
-    accentColor: "#94A3B8",
-    tags: ["Design System", "Figma", "Tokens"],
+    image: "/carusel/carusel12.jpg",
+    accentColor: "#8AB4B0",
+    tags: ["Showroom", "Graphite", "Botanical"],
   },
   {
     id: 13,
-    title: "Helio Bank",
-    category: "Fintech App",
+    title: "Noir Suite",
+    category: "Bedroom",
     year: "2023",
-    color: "#001A0D",
-    accentColor: "#34D399",
-    tags: ["Fintech", "iOS", "UX"],
+    image: "/carusel/carusel13.jpg",
+    accentColor: "#8B7355",
+    tags: ["Bedroom", "Black", "Tufted"],
   },
   {
     id: 14,
-    title: "Dusk Festival",
-    category: "Event Identity",
-    year: "2023",
-    color: "#1A0800",
-    accentColor: "#FB923C",
-    tags: ["Event", "Branding", "Poster"],
+    title: "Grand Classique",
+    category: "Master Bedroom",
+    year: "2024",
+    image: "/carusel/carusel14.jpg",
+    accentColor: "#C9A84C",
+    tags: ["Bedroom", "Classic", "Molding"],
   },
   {
     id: 15,
-    title: "Cryo Labs",
-    category: "Scientific Viz",
+    title: "Emerald Lounge",
+    category: "Living Room",
     year: "2024",
-    color: "#00101A",
-    accentColor: "#38BDF8",
-    tags: ["Data Viz", "WebGL", "Science"],
+    image: "/carusel/carusel15.jpg",
+    accentColor: "#2D7A5A",
+    tags: ["Living", "Emerald", "Crystal"],
   },
   {
     id: 16,
-    title: "Mira Health",
-    category: "Healthcare UX",
-    year: "2024",
-    color: "#0A001A",
-    accentColor: "#C084FC",
-    tags: ["Healthcare", "Mobile", "UX"],
-  },
-  {
-    id: 17,
-    title: "Fold Studio",
-    category: "Architecture",
+    title: "Dark Walnut Suite",
+    category: "Bedroom",
     year: "2023",
-    color: "#1A1200",
-    accentColor: "#FDE68A",
-    tags: ["Architecture", "3D", "Render"],
-  },
-  {
-    id: 18,
-    title: "Neon District",
-    category: "Game UI",
-    year: "2024",
-    color: "#0A001A",
-    accentColor: "#F472B6",
-    tags: ["Game UI", "Unity", "HUD"],
-  },
-  {
-    id: 19,
-    title: "Atlas Maps",
-    category: "Geo Data Viz",
-    year: "2023",
-    color: "#001A14",
-    accentColor: "#6EE7B7",
-    tags: ["Maps", "D3.js", "Data"],
-  },
-  {
-    id: 20,
-    title: "Rune Audio",
-    category: "Music App",
-    year: "2024",
-    color: "#0D0014",
-    accentColor: "#A78BFA",
-    tags: ["Music", "iOS", "Motion"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
-  },
-  {
-    id: 21,
-    title: "Zinc Editorial",
-    category: "Editorial Design",
-    year: "2024",
-    color: "#0A0A00",
-    accentColor: "#EAB308",
-    tags: ["Editorial", "Layout", "Print"],
+    image: "/carusel/carusel16.jpg",
+    accentColor: "#9B7A3A",
+    tags: ["Bedroom", "Walnut", "Bronze"],
   },
 ];
 
@@ -297,120 +172,212 @@ function ProjectCard({ project }: { project: Project }): ReactNode {
     <div
       style={{
         width: 150,
-        height: 70,
-        borderRadius: 16,
-        background: project.color,
-        border: `1px solid ${project.accentColor}25`,
+        height: 100,
+        borderRadius: 12,
         overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "20px 18px",
         position: "relative",
-        boxShadow: `0 20px 60px ${project.accentColor}15, 0 0 0 1px ${project.accentColor}12`,
+        flexShrink: 0,
       }}
     >
-      {/* Glow orb */}
+      {/* Photo */}
+      <Image
+        src={project.image}
+        alt={project.title}
+        fill
+        sizes="150px"
+        style={{ objectFit: "cover" }}
+        draggable={false}
+      />
+
+      {/* Gradient overlay */}
       <div
         style={{
           position: "absolute",
-          top: -40,
-          right: -40,
-          width: 150,
-          height: 150,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${project.accentColor}28 0%, transparent 70%)`,
-          pointerEvents: "none",
+          inset: 0,
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.18) 55%, transparent 100%)",
         }}
       />
 
-      {/* Top row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div
-          style={{
-            width: 50,
-            height: 30,
-            borderRadius: 8,
-            background: `${project.accentColor}18`,
-            border: `1px solid ${project.accentColor}35`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              background: project.accentColor,
-              opacity: 0.85,
-            }}
-          />
-        </div>
-        <span
-          style={{
-            fontSize: 10,
-            color: `${project.accentColor}80`,
-            fontWeight: 500,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-          }}
-        >
-          {project.year}
-        </span>
-      </div>
-
-      {/* Decorative line */}
+      {/* Accent top line */}
       <div
         style={{
-          width: "100%",
-          height: 1,
-          background: `linear-gradient(90deg, ${project.accentColor}45 0%, transparent 100%)`,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 2,
+          background: project.accentColor,
+          opacity: 0.85,
         }}
       />
 
-      {/* Bottom content */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div>
-          <p
-            style={{
-              fontSize: 10,
-              color: `${project.accentColor}70`,
-              fontWeight: 500,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              marginBottom: 5,
-            }}
-          >
-            {project.category}
-          </p>
-          <h3
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              color: "#ffffff",
-              lineHeight: 1.1,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {project.title}
-          </h3>
-        </div>
+      {/* Year badge */}
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          fontSize: 9,
+          fontWeight: 600,
+          color: project.accentColor,
+          letterSpacing: "0.12em",
+          background: "rgba(0,0,0,0.45)",
+          padding: "2px 6px",
+          borderRadius: 4,
+        }}
+      >
+        {project.year}
+      </div>
 
-        {/* Tags */}
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+      {/* Bottom text */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "10px 10px 10px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 8,
+            fontWeight: 500,
+            color: project.accentColor,
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            marginBottom: 3,
+            opacity: 0.9,
+          }}
+        >
+          {project.category}
+        </p>
+        <h3
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#ffffff",
+            lineHeight: 1.15,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {project.title}
+        </h3>
+      </div>
+    </div>
+  );
+}
+
+// ── FeaturedCard — shown in ring center on click ───────────────────────────
+
+function FeaturedCard({ project }: { project: Project }): ReactNode {
+  return (
+    <div
+      style={{
+        width: 380,
+        height: 260,
+        borderRadius: 16,
+        overflow: "hidden",
+        position: "relative",
+        boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px ${project.accentColor}30`,
+      }}
+    >
+      <Image
+        src={project.image}
+        alt={project.title}
+        fill
+        sizes="280px"
+        style={{ objectFit: "cover" }}
+        draggable={false}
+      />
+
+      {/* Gradient */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)",
+        }}
+      />
+
+      {/* Accent line top */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: project.accentColor,
+        }}
+      />
+
+      {/* Year */}
+      <div
+        style={{
+          position: "absolute",
+          top: 14,
+          right: 14,
+          fontSize: 10,
+          fontWeight: 600,
+          color: project.accentColor,
+          letterSpacing: "0.14em",
+          background: "rgba(0,0,0,0.5)",
+          padding: "3px 8px",
+          borderRadius: 5,
+        }}
+      >
+        {project.year}
+      </div>
+
+      {/* Bottom info */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "20px 18px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 9,
+            fontWeight: 500,
+            color: project.accentColor,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            marginBottom: 6,
+          }}
+        >
+          {project.category}
+        </p>
+        <h2
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: "#fff",
+            lineHeight: 1.15,
+            letterSpacing: "-0.02em",
+            marginBottom: 10,
+          }}
+        >
+          {project.title}
+        </h2>
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
           {project.tags.map((tag) => (
             <span
               key={tag}
               style={{
-                fontSize: 9,
+                fontSize: 8,
                 fontWeight: 500,
                 color: project.accentColor,
-                background: `${project.accentColor}12`,
-                border: `1px solid ${project.accentColor}28`,
+                background: `${project.accentColor}18`,
+                border: `1px solid ${project.accentColor}35`,
                 borderRadius: 100,
-                padding: "3px 8px",
+                padding: "2px 8px",
                 letterSpacing: "0.05em",
               }}
             >
@@ -426,6 +393,8 @@ function ProjectCard({ project }: { project: Project }): ReactNode {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+
   const carouselItems = PROJECTS.map((project) => (
     <ProjectCard key={project.id} project={project} />
   ));
@@ -445,17 +414,23 @@ export default function ProjectsPage() {
         </p>
       </section>
 
-      {/* Carousel — data-lenis-prevent stops Lenis from stealing wheel events */}
-      <section className="flex-1 w-full" style={{ height: "65vh", minHeight: 520 }} data-lenis-prevent>
+      {/* Carousel */}
+      <section
+        className="flex-1 w-full"
+        style={{ height: "65vh", minHeight: 520 }}
+        data-lenis-prevent
+      >
         <NewCarusel
           items={carouselItems}
-          radius={300}
+          radius={500}
           scrollSpeed={0.01}
-          baseTiltAngle={-35}
+          baseTiltAngle={-25}
           mouseTiltIntensity={8}
           dragSpeed={0.3}
           touchSpeed={0.3}
-          autoRotate={false}
+          autoRotate={true}
+          onCardClick={(_, index) => setActiveProject(PROJECTS[index])}
+          centerContent={activeProject ? <FeaturedCard project={activeProject} /> : undefined}
         />
       </section>
 
