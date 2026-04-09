@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { useMenuAnimation } from '@/app/hooks/useMenuAnimation';
+import { useMenuAnimation } from '@/hooks/useMenuAnimation';
 
 const NAV_LINKS = [
   { label: 'Home',     href: '/' },
