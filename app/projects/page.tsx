@@ -431,7 +431,7 @@ export default function ProjectsPage() {
   ));
 
   return (
-    <main className="min-h-screen bg-[#080808] flex flex-col">
+    <main className="min-h-screen flex flex-col">
       {/* Header */}
       <section className="pt-32 pb-10 px-8 flex flex-col items-center text-center">
         <p className="text-xs font-medium tracking-[0.25em] uppercase text-white/25 mb-5">
