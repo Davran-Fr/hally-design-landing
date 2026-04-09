@@ -310,7 +310,7 @@ export function useAboutAnimation(refs: Refs) {
     ScrollTrigger.create({
       trigger: sectionRef.current,
       start: 'top top',
-      end: '+=200%',
+      end: '+=400%',
       pin: true,
       onUpdate: (self) => {
         const p = self.progress;
