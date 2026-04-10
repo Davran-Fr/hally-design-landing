@@ -28,11 +28,6 @@ function isImageItem(item: CarouselItem): item is ImageItem {
   );
 }
 
-interface ActiveItem {
-  item: CarouselItem;
-  index: number;
-}
-
 interface NewCaruselProps {
   items?: CarouselItem[];
   radius?: number;
@@ -43,7 +38,9 @@ interface NewCaruselProps {
   touchSpeed?: number;
   autoRotate?: boolean;
   autoRotateSpeed?: number;
-  onCardClick?: (item: CarouselItem, index: number) => void;
+  onCardHover?: (item: CarouselItem, index: number) => void;
+  onCardHoverEnd?: () => void;
+  onSpinStart?: () => void;
   centerContent?: ReactNode;
 }
 
@@ -59,16 +56,18 @@ export default function NewCarusel({
   touchSpeed = 0.3,
   autoRotate = false,
   autoRotateSpeed = 0.15,
-  onCardClick,
+  onCardHover,
+  onCardHoverEnd,
+  onSpinStart,
   centerContent,
 }: NewCaruselProps) {
   const itemCount = items.length;
 
   const [rotation, setRotation] = useState<number>(0);
+  const [yOffsetScale, setYOffsetScale] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [smoothMouse, setSmoothMouse] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [activeItem, setActiveItem] = useState<ActiveItem | null>(null);
   const [showCursor, setShowCursor] = useState<boolean>(false);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [smoothCursor, setSmoothCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -84,6 +83,8 @@ export default function NewCarusel({
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef<boolean>(false);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSpinningRef = useRef<boolean>(false);
   const autoRotateRef = useRef<boolean>(autoRotate);
   autoRotateRef.current = autoRotate;
 
@@ -160,6 +161,26 @@ export default function NewCarusel({
       } else if (!autoRotateRef.current) {
         momentumRef.current = 0;
       }
+
+      // Lerp yOffsetScale: 0 while spinning fast, 1 when stopped/slow
+      // Threshold 0.8 — autoRotate (~0.1) won't trigger flat mode
+      const isSpinning = Math.abs(momentumRef.current) > 0.8;
+      const scaleTarget = isSpinning ? 0 : 1;
+      setYOffsetScale((p) => {
+        const diff = scaleTarget - p;
+        if (Math.abs(diff) < 0.001) return scaleTarget;
+        return p + diff * 0.04;
+      });
+
+      // Detect spin start — clear hover & featured card with zero delay
+      if (isSpinning && !isSpinningRef.current) {
+        if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current);
+        setHoveredIndex(null);
+        setShowCursor(false);
+        onSpinStart?.();
+      }
+      isSpinningRef.current = isSpinning;
+
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -221,17 +242,6 @@ export default function NewCarusel({
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [showCursor]);
-
-  // ── Card click ────────────────────────────────────────────────────────
-  const handleCardClick = useCallback(
-    (item: CarouselItem, index: number) => {
-      if (isScrollingRef.current) return;
-      if (Math.abs(dragRef.current.startX - dragRef.current.lastX) > 5) return;
-      setActiveItem({ item, index });
-      onCardClick?.(item, index);
-    },
-    [onCardClick]
-  );
 
   // ── Empty state ────────────────────────────────────────────────────────
   if (itemCount === 0) {
@@ -297,97 +307,52 @@ export default function NewCarusel({
               transformStyle: "preserve-3d",
             }}
           >
-            {/* Center content — shown on card click */}
-            {(activeItem || centerContent) && (
-              <div
-                style={{
-                  position: "absolute",
-                  transformStyle: "preserve-3d",
-                  transform: "translateZ(0px)",
-                  zIndex: 10,
-                }}
-              >
-                <div
-                  style={{
-                    position: "fixed",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    pointerEvents: "none",
-                    zIndex: 100,
-                    textAlign: "center",
-                  }}
-                >
-                  {activeItem ? (
-                    <div style={{ animation: "fadeIn 0.35s ease" }}>
-                      {/* centerContent (from page) takes priority — shows featured card */}
-                      {centerContent ?? (
-                        isImageItem(activeItem.item) ? (
-                          <>
-                            <img
-                              src={activeItem.item.src}
-                              alt={activeItem.item.title ?? ""}
-                              style={{
-                                maxWidth: 200,
-                                backgroundColor: 'red',
-                                maxHeight: 280,
-                                objectFit: "cover",
-                                borderRadius: 4,
-                                display: "block",
-                                margin: "0 auto",
-                              }}
-                            />
-                            {activeItem.item.title && (
-                              <div style={{ marginTop: 12, fontSize: 20, fontWeight: 600, color: "#fff", letterSpacing: "-0.02em" }}>
-                                {activeItem.item.title}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          activeItem.item as ReactNode
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    centerContent
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Cards on the ring */}
             {items.map((item, i) => {
               const angle = rotation + angleStep * i;
-              const isActive = activeItem?.index === i;
               const isHovered = hoveredIndex === i;
+
+              // Staircase Y offset: 0 while spinning, smooth lerp to full when stopped
+              const angleRad = (angle * Math.PI) / 180;
+              const yOffset = (Math.cos(angleRad) - 1) * 60 * yOffsetScale;
+
               return (
                 // Outer div — orbit position, NO transition (updates every frame)
                 <div
                   key={i}
+                  suppressHydrationWarning
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
-                    transform: `translateX(-50%) translateY(-50%) rotateY(${angle}deg) translateZ(${radius}px) rotateY(-90deg)`,
+                    transform: `translateX(-50%) translateY(-100%) translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px) rotateY(-90deg)`,
                   }}
                 >
                   {/* Inner div — hover pull-out only, transition safe here */}
                   <div
-                    onClick={() => handleCardClick(item, i)}
                     onMouseEnter={() => {
+                      if (isSpinningRef.current) return;
+                      // Cancel any pending leave — prevents flicker at card edges
+                      if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current);
                       setHoveredIndex(i);
-                      if (!isScrollingRef.current) setShowCursor(true);
+                      if (!isScrollingRef.current) {
+                        setShowCursor(true);
+                        onCardHover?.(item, i);
+                      }
                     }}
                     onMouseLeave={() => {
-                      setHoveredIndex(null);
-                      setShowCursor(false);
+                      // Short debounce: if mouse re-enters another card within 80ms,
+                      // the leave is cancelled — no flicker, no false onCardHoverEnd
+                      hoverLeaveTimerRef.current = setTimeout(() => {
+                        setHoveredIndex(null);
+                        setShowCursor(false);
+                        onCardHoverEnd?.();
+                      }, 80);
                     }}
                     style={{
                       transformStyle: "preserve-3d",
-                      transform: `translateY(${isHovered ? -40 : 0}px)`,
+                      transform: `translateX(${isHovered ? 40 : 0}px)`,
                       transition: "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                      cursor: "pointer",
-                      outline: isActive ? "2px solid rgba(255,255,255,0.6)" : "none",
-                      outlineOffset: 2,
+                      cursor: "default",
                     }}
                   >
                     {isImageItem(item) ? (
@@ -414,6 +379,24 @@ export default function NewCarusel({
           </div>
         </div>
       </div>
+
+      {/* Center content — outside 3D hierarchy, no transform contamination */}
+      {centerContent && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            pointerEvents: "none",
+            zIndex: 50,
+          }}
+        >
+          <div style={{ animation: "fadeIn 0.35s ease" }}>
+            {centerContent}
+          </div>
+        </div>
+      )}
 
       {/* Custom "View" cursor */}
       <div

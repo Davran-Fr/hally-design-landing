@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useMenuAnimation } from '@/hooks/useMenuAnimation';
 
 const NAV_LINKS = [
@@ -13,6 +14,8 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isProjects = pathname === '/projects';
 
   const {
     menuOpen, setMenuOpen,
@@ -30,10 +33,11 @@ export default function Header() {
     <>
       {/* ── Header ── */}
       <header className={`
-        fixed top-2.5 left-1/2 max-w-[350px] font-cormorant -translate-x-1/2 z-50
-        w-[calc(100%-2rem)] bg-brand/20  border-brand/50
+        fixed top-2.5 z-50 font-cormorant max-w-87.5
+        w-[calc(100%-2rem)] bg-brand/20 border-brand/50
         backdrop-blur-2xl rounded-xl overflow-hidden
-        transition-all duration-500
+        transition-all duration-700 ease-in-out
+        ${isProjects ? 'left-6 translate-x-0' : 'left-1/2 -translate-x-1/2'}
         ${scrolled ? 'shadow-[0_8px_40px_rgba(0,0,0,0.18)]' : ''}
       `}>
         <div className="flex items-stretch justify-between h-12 px-1 py-1">
