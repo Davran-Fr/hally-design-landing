@@ -332,6 +332,20 @@ const SORTED_PROJECTS = [...PROJECTS].sort((a, b) =>
   a.category.localeCompare(b.category)
 );
 
+// Category group boundaries for ring labels
+const CATEGORY_GROUPS = (() => {
+  const groups: { label: string; count: number; startIndex: number; endIndex: number }[] = [];
+  let i = 0;
+  while (i < SORTED_PROJECTS.length) {
+    const category = SORTED_PROJECTS[i].category;
+    let j = i;
+    while (j < SORTED_PROJECTS.length && SORTED_PROJECTS[j].category === category) j++;
+    groups.push({ label: category, count: j - i, startIndex: i, endIndex: j - 1 });
+    i = j;
+  }
+  return groups;
+})();
+
 // ── ProjectCard ────────────────────────────────────────────────────────────
 
 function ProjectCard({ project }: { project: Project }): ReactNode {
@@ -539,6 +553,7 @@ export default function ProjectsPage() {
           onCardHover={handleCardHover}
           onCardHoverEnd={handleCardHoverEnd}
           onSpinStart={handleSpinStart}
+          categoryGroups={CATEGORY_GROUPS}
           centerContent={activeProject ? <FeaturedCard project={activeProject} /> : undefined}
         />
       </section>

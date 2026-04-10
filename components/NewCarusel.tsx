@@ -28,6 +28,13 @@ function isImageItem(item: CarouselItem): item is ImageItem {
   );
 }
 
+export interface CategoryGroup {
+  label: string;
+  count: number;
+  startIndex: number;
+  endIndex: number;
+}
+
 interface NewCaruselProps {
   items?: CarouselItem[];
   radius?: number;
@@ -42,6 +49,7 @@ interface NewCaruselProps {
   onCardHoverEnd?: () => void;
   onSpinStart?: () => void;
   centerContent?: ReactNode;
+  categoryGroups?: CategoryGroup[];
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -60,6 +68,7 @@ export default function NewCarusel({
   onCardHoverEnd,
   onSpinStart,
   centerContent,
+  categoryGroups,
 }: NewCaruselProps) {
   const itemCount = items.length;
 
@@ -307,6 +316,48 @@ export default function NewCarusel({
               transformStyle: "preserve-3d",
             }}
           >
+            {/* Category labels — positioned at group midpoint, counter-rotated to face screen */}
+            {categoryGroups?.map((group) => {
+              const midIndex = (group.startIndex + group.endIndex) / 2;
+              const midAngle = rotation + angleStep * midIndex;
+              const midAngleRad = (midAngle * Math.PI) / 180;
+              const labelYOffset = (Math.cos(midAngleRad) - 1) * 60 * yOffsetScale;
+
+              return (
+                <div
+                  key={group.label}
+                  suppressHydrationWarning
+                  style={{
+                    position: "absolute",
+                    transformStyle: "preserve-3d",
+                    // Place at midpoint angle on ring, push beyond cards, counter-rotate to face camera
+                    transform: `translateX(-50%) translateY(-50%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 90}px) rotateY(${-midAngle}deg)`,
+                    pointerEvents: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                    <span style={{
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "rgba(255,255,255,0.85)",
+                      letterSpacing: "-0.02em",
+                    }}>
+                      {group.label}
+                    </span>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 400,
+                      color: "rgba(255,255,255,0.35)",
+                      letterSpacing: "0.02em",
+                    }}>
+                      ({group.count})
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+
             {/* Cards on the ring */}
             {items.map((item, i) => {
               const angle = rotation + angleStep * i;
