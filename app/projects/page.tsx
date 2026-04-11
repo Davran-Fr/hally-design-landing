@@ -29,6 +29,33 @@ const PROJECTS: Project[] = [
     tags: ["Dining", "Marble", "Top View"],
   },
   {
+    id: 1,
+    title: "Marble Garden",
+    category: "Dining Room",
+    year: "2024",
+    image: "/carusel/carusel.jpg",
+    accentColor: "#A89060",
+    tags: ["Dining", "Marble", "Top View"],
+  },
+  {
+    id: 1,
+    title: "Marble Garden",
+    category: "Dining Room",
+    year: "2024",
+    image: "/carusel/carusel.jpg",
+    accentColor: "#A89060",
+    tags: ["Dining", "Marble", "Top View"],
+  },
+  {
+    id: 1,
+    title: "Marble Garden",
+    category: "Dining Room",
+    year: "2024",
+    image: "/carusel/carusel.jpg",
+    accentColor: "#A89060",
+    tags: ["Dining", "Marble", "Top View"],
+  },
+  {
     id: 2,
     title: "Sage Retreat",
     category: "Bedroom",
@@ -38,6 +65,33 @@ const PROJECTS: Project[] = [
     tags: ["Bedroom", "Sage Green", "Herringbone"],
   },
   {
+    id: 3,
+    title: "Concrete Villa",
+    category: "Architecture",
+    year: "2023",
+    image: "/carusel/carusel3.jpg",
+    accentColor: "#9EAAB4",
+    tags: ["Exterior", "Modern", "Minimalist"],
+  },
+   {
+    id: 3,
+    title: "Concrete Villa",
+    category: "Architecture",
+    year: "2023",
+    image: "/carusel/carusel3.jpg",
+    accentColor: "#9EAAB4",
+    tags: ["Exterior", "Modern", "Minimalist"],
+  },
+   {
+    id: 3,
+    title: "Concrete Villa",
+    category: "Architecture",
+    year: "2023",
+    image: "/carusel/carusel3.jpg",
+    accentColor: "#9EAAB4",
+    tags: ["Exterior", "Modern", "Minimalist"],
+  },
+   {
     id: 3,
     title: "Concrete Villa",
     category: "Architecture",
@@ -56,6 +110,33 @@ const PROJECTS: Project[] = [
     tags: ["Living", "Taupe", "Art Decor"],
   },
   {
+    id: 5,
+    title: "Aqua Spa",
+    category: "Pool & Wellness",
+    year: "2024",
+    image: "/carusel/carusel5.jpg",
+    accentColor: "#4A90C4",
+    tags: ["Pool", "Spa", "Marble"],
+  },
+   {
+    id: 5,
+    title: "Aqua Spa",
+    category: "Pool & Wellness",
+    year: "2024",
+    image: "/carusel/carusel5.jpg",
+    accentColor: "#4A90C4",
+    tags: ["Pool", "Spa", "Marble"],
+  },
+   {
+    id: 5,
+    title: "Aqua Spa",
+    category: "Pool & Wellness",
+    year: "2024",
+    image: "/carusel/carusel5.jpg",
+    accentColor: "#4A90C4",
+    tags: ["Pool", "Spa", "Marble"],
+  },
+   {
     id: 5,
     title: "Aqua Spa",
     category: "Pool & Wellness",
@@ -155,13 +236,22 @@ const PROJECTS: Project[] = [
     tags: ["Living", "Emerald", "Crystal"],
   },
   {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
+    id: 15,
+    title: "Emerald Lounge",
+    category: "Living Room",
+    year: "2024",
+    image: "/carusel/carusel15.jpg",
+    accentColor: "#2D7A5A",
+    tags: ["Living", "Emerald", "Crystal"],
+  },
+  {
+    id: 15,
+    title: "Emerald Lounge",
+    category: "Living Room",
+    year: "2024",
+    image: "/carusel/carusel15.jpg",
+    accentColor: "#2D7A5A",
+    tags: ["Living", "Emerald", "Crystal"],
   },
   {
     id: 16,
@@ -217,114 +307,7 @@ const PROJECTS: Project[] = [
     accentColor: "#9B7A3A",
     tags: ["Bedroom", "Walnut", "Bronze"],
   },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
-  {
-    id: 16,
-    title: "Dark Walnut Suite",
-    category: "Bedroom",
-    year: "2023",
-    image: "/carusel/carusel16.jpg",
-    accentColor: "#9B7A3A",
-    tags: ["Bedroom", "Walnut", "Bronze"],
-  },
+
 ];
 
 // Grouped by category so same-category cards sit together on the ring
@@ -379,7 +362,7 @@ function FeaturedCard({ project }: { project: Project }): ReactNode {
     <div
       style={{
         width: 380,
-        height: 200,
+        height: 250,
         borderRadius: 16,
         overflow: "hidden",
         position: "relative",
@@ -405,36 +388,6 @@ function FeaturedCard({ project }: { project: Project }): ReactNode {
         }}
       />
 
-      {/* Accent line top */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 3,
-          background: project.accentColor,
-        }}
-      />
-
-      {/* Year */}
-      <div
-        style={{
-          position: "absolute",
-          top: 14,
-          right: 14,
-          fontSize: 10,
-          fontWeight: 600,
-          color: project.accentColor,
-          letterSpacing: "0.14em",
-          background: "rgba(0,0,0,0.5)",
-          padding: "3px 8px",
-          borderRadius: 5,
-        }}
-      >
-        {project.year}
-      </div>
-
       {/* Bottom info */}
       <div
         style={{
@@ -445,49 +398,19 @@ function FeaturedCard({ project }: { project: Project }): ReactNode {
           padding: "20px 18px",
         }}
       >
-        <p
-          style={{
-            fontSize: 9,
-            fontWeight: 500,
-            color: project.accentColor,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            marginBottom: 6,
-          }}
-        >
-          {project.category}
-        </p>
         <h2
           style={{
             fontSize: 20,
+            textAlign : 'center',
             fontWeight: 700,
             color: "#fff",
             lineHeight: 1.15,
             letterSpacing: "-0.02em",
             marginBottom: 10,
           }}
-        >
+         >
           {project.title}
         </h2>
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-          {project.tags.map((tag) => (
-            <span
-              key={tag}
-              style={{
-                fontSize: 8,
-                fontWeight: 500,
-                color: project.accentColor,
-                background: `${project.accentColor}18`,
-                border: `1px solid ${project.accentColor}35`,
-                borderRadius: 100,
-                padding: "2px 8px",
-                letterSpacing: "0.05em",
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -520,7 +443,20 @@ export default function ProjectsPage() {
     hoverTimerRef.current = setTimeout(() => {
       activeProjectRef.current = null;
       setActiveProject(null);
-    }, 900);
+    }, 2500);
+  };
+
+  const handleCenterEnter = () => {
+    // Mouse entered the center card — cancel any pending hide
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+  };
+
+  const handleCenterLeave = () => {
+    // Mouse left the center card — start hide timer
+    hoverTimerRef.current = setTimeout(() => {
+      activeProjectRef.current = null;
+      setActiveProject(null);
+    }, 2500);
   };
 
   const handleSpinStart = () => {
@@ -554,12 +490,22 @@ export default function ProjectsPage() {
           onCardHoverEnd={handleCardHoverEnd}
           onSpinStart={handleSpinStart}
           categoryGroups={CATEGORY_GROUPS}
-          centerContent={activeProject ? <FeaturedCard project={activeProject} /> : undefined}
+          centerContent={
+            activeProject ? (
+              <div
+                onMouseEnter={handleCenterEnter}
+                onMouseLeave={handleCenterLeave}
+                style={{ transform: "translateY(-20px)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
+              >
+                <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(0,0,0,0.5)", margin: 0 }}>
+                  {activeProject.category}
+                </p>
+                <FeaturedCard project={activeProject} />
+              </div>
+            ) : undefined
+          }
         />
       </section>
-
-      {/* Footer counter */}
-     
     </main>
   );
 }

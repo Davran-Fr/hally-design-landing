@@ -321,7 +321,7 @@ export default function NewCarusel({
               const midIndex = (group.startIndex + group.endIndex) / 2;
               const midAngle = rotation + angleStep * midIndex;
               const midAngleRad = (midAngle * Math.PI) / 180;
-              const labelYOffset = (Math.cos(midAngleRad) - 1) * 60 * yOffsetScale;
+              const labelYOffset = (Math.cos(midAngleRad) * 0.75 - 1) * 100 * yOffsetScale;
 
               return (
                 <div
@@ -331,25 +331,29 @@ export default function NewCarusel({
                     position: "absolute",
                     transformStyle: "preserve-3d",
                     // Place at midpoint angle on ring, push beyond cards, counter-rotate to face camera
-                    transform: `translateX(-50%) translateY(-50%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 90}px) rotateY(${-midAngle}deg)`,
+                    transform: `translateX(-50%) translateY(-100%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 125}px) rotateY(${-midAngle}deg)`,
                     pointerEvents: "none",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                     <span style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "rgba(255,255,255,0.85)",
-                      letterSpacing: "-0.02em",
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: "rgba(0,0,0,0.72)",
+                      letterSpacing: "-0.01em",
+                      borderBottom: "1px solid rgba(0,0,0,0.22)",
+                      paddingBottom: 2,
                     }}>
                       {group.label}
                     </span>
                     <span style={{
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: 400,
-                      color: "rgba(255,255,255,0.35)",
+                      color: "rgba(0,0,0,0.38)",
                       letterSpacing: "0.02em",
+                      verticalAlign: "super",
+                      lineHeight: 1,
                     }}>
                       ({group.count})
                     </span>
@@ -368,42 +372,40 @@ export default function NewCarusel({
               const yOffset = (Math.cos(angleRad) - 1) * 60 * yOffsetScale;
 
               return (
-                // Outer div — orbit position, NO transition (updates every frame)
+                // Outer div — fixed orbit position, owns the hit-box so it never moves
                 <div
                   key={i}
                   suppressHydrationWarning
+                  onMouseEnter={() => {
+                    if (isSpinningRef.current) return;
+                    if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current);
+                    setHoveredIndex(i);
+                    if (!isScrollingRef.current) {
+                      setShowCursor(true);
+                      onCardHover?.(item, i);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    hoverLeaveTimerRef.current = setTimeout(() => {
+                      setHoveredIndex(null);
+                      setShowCursor(false);
+                      onCardHoverEnd?.();
+                    }, 80);
+                  }}
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
                     transform: `translateX(-50%) translateY(-100%) translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px) rotateY(-90deg)`,
                   }}
                 >
-                  {/* Inner div — hover pull-out only, transition safe here */}
+                  {/* Inner div — visual slide only, pointer-events disabled so the
+                      outer hit-box is the sole source of hover truth */}
                   <div
-                    onMouseEnter={() => {
-                      if (isSpinningRef.current) return;
-                      // Cancel any pending leave — prevents flicker at card edges
-                      if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current);
-                      setHoveredIndex(i);
-                      if (!isScrollingRef.current) {
-                        setShowCursor(true);
-                        onCardHover?.(item, i);
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      // Short debounce: if mouse re-enters another card within 80ms,
-                      // the leave is cancelled — no flicker, no false onCardHoverEnd
-                      hoverLeaveTimerRef.current = setTimeout(() => {
-                        setHoveredIndex(null);
-                        setShowCursor(false);
-                        onCardHoverEnd?.();
-                      }, 80);
-                    }}
                     style={{
                       transformStyle: "preserve-3d",
                       transform: `translateX(${isHovered ? 40 : 0}px)`,
                       transition: "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                      cursor: "default",
+                      pointerEvents: "none",
                     }}
                   >
                     {isImageItem(item) ? (
@@ -439,7 +441,6 @@ export default function NewCarusel({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            pointerEvents: "none",
             zIndex: 50,
           }}
         >
