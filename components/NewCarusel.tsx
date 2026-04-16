@@ -357,6 +357,7 @@ export default function NewCarusel({
   const angleStep = 360 / itemCount;
   const perspective = 1200;
 
+
   return (
     <>
       {/* Main container */}
@@ -374,7 +375,7 @@ export default function NewCarusel({
           alignItems: "center",
           justifyContent: "center",
           perspective,
-          perspectiveOrigin: "0% 0%",
+          perspectiveOrigin: "50% 50%",
           touchAction: "none",
           userSelect: "none",
           cursor: "grab",
@@ -414,7 +415,7 @@ export default function NewCarusel({
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
-                    transform: `translateX(-50%) translateY(-100%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 125}px) rotateY(${-midAngle}deg)`,
+                    transform: `translateX(-50%) translateY(-100%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 125}px) rotateY(${-midAngle}deg) rotateX(${-baseTiltAngle}deg)`,
                     pointerEvents: "none",
                     whiteSpace: "nowrap",
                     opacity: labelsOpacity,

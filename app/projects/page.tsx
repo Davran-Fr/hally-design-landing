@@ -17,8 +17,8 @@ function useXLScale(): number {
   return scale;
 }
 
-function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+function useIsMobile(): boolean | null {
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   useEffect(() => {
     const update = () => setIsMobile(window.innerWidth < 1280);
     update();
@@ -252,7 +252,7 @@ function GridView(): ReactNode {
 
 // ── Page ───────────────────────────────────────────────────────────────────
 
-const MOBILE_TILT_ANGLE = -10;
+const MOBILE_TILT_ANGLE = -15;
 const DESKTOP_TILT_ANGLE = -25;
 
 function CarouselView(): ReactNode {
@@ -322,6 +322,11 @@ function CarouselView(): ReactNode {
     <ProjectCard key={i} project={project} scale={scale > 1 ? 1.15 : 1} />
   ));
 
+  // Wait until viewport is measured before rendering any carousel
+  if (isMobile === null) {
+    return <main className="h-screen bg-[#f5f3ee]" />;
+  }
+
   if (isMobile) {
     const mobileItems = SORTED_PROJECTS.map((project, i) => (
       <ProjectCard key={i} project={project} scale={1.6} />
@@ -372,14 +377,14 @@ function CarouselView(): ReactNode {
             baseTiltAngle={MOBILE_TILT_ANGLE}
             mouseTiltIntensity={0}
             dragSpeed={0.4}
-            touchSpeed={0.5}
+            touchSpeed={0.05}
             autoRotate={false}
             disableStaircase
             highlightActive
             disableHover
             cardBaseAngle={-90}
             popOutX={50}
-            activeAngleOffset={-90}
+            activeAngleOffset={-75}
             onActiveIndexChange={(i) => setDisplayProject(SORTED_PROJECTS[i])}
             categoryGroups={CATEGORY_GROUPS}
             labelsOpacity={0}
@@ -405,8 +410,8 @@ function CarouselView(): ReactNode {
           scrollSpeed={0.01}
           baseTiltAngle={DESKTOP_TILT_ANGLE}
           mouseTiltIntensity={1}
-          dragSpeed={0.3}
-          touchSpeed={0.3}
+          dragSpeed={0.05}
+          touchSpeed={0.05}
           autoRotate={false}
           onCardHover={handleCardHover}
           onCardHoverEnd={handleCardHoverEnd}
