@@ -1,0 +1,116 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - button "Поиск" [ref=e6] [cursor=pointer]
+        - link [ref=e7] [cursor=pointer]:
+          - /url: /cart
+        - button "Меню" [ref=e8] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - link:
+            - /url: /
+          - button:
+            - img
+        - navigation:
+          - link:
+            - /url: /
+            - text: Главная
+          - generic:
+            - button:
+              - text: Каталог
+              - img
+            - link:
+              - /url: /category
+              - text: Весь каталог →
+          - link:
+            - /url: /posts
+            - text: Блог
+          - link:
+            - /url: /company
+            - text: Компания
+          - link:
+            - /url: /partner
+            - text: Партнёрам
+          - link:
+            - /url: /contact
+            - text: Контакты
+        - generic:
+          - generic:
+            - button:
+              - text: English
+              - img
+            - generic:
+              - button: Русский
+              - button: Türkmen
+          - generic: Позвоните нам 3965410
+  - navigation:
+    - generic:
+      - generic:
+        - generic:
+          - list
+      - generic:
+        - list:
+          - listitem:
+            - link "Главная":
+              - /url: /
+              - generic: Главная
+          - listitem:
+            - link "Каталог":
+              - /url: /category
+              - generic: Каталог
+          - listitem:
+            - link "Статьи":
+              - /url: /posts
+              - generic: Статьи
+          - listitem:
+            - link "Контакты":
+              - /url: /contact
+              - generic: Контакты
+  - generic [ref=e13]:
+    - heading "404" [level=1] [ref=e14]
+    - heading "This page could not be found." [level=2] [ref=e16]
+  - contentinfo [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - link [ref=e21] [cursor=pointer]:
+            - /url: "#"
+          - link [ref=e22] [cursor=pointer]:
+            - /url: "#"
+          - link [ref=e23] [cursor=pointer]:
+            - /url: "#"
+          - link [ref=e24] [cursor=pointer]:
+            - /url: "#"
+          - link [ref=e25] [cursor=pointer]:
+            - /url: "#"
+        - generic [ref=e26]:
+          - generic [ref=e29] [cursor=pointer]: Связаться с нами
+          - generic [ref=e30]:
+            - link "8 800 600 98 87" [ref=e31] [cursor=pointer]:
+              - /url: tel:88006009887
+            - link "Доп. номер 8 343 344 63 90" [ref=e32] [cursor=pointer]:
+              - /url: tel:83433446390
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - generic [ref=e37]: По всем вопросам и предложениям вы можете направить информацию на почту
+          - link "info@mykeiko.com" [ref=e38] [cursor=pointer]:
+            - /url: mailto:info@mykeiko.com
+        - generic [ref=e39]:
+          - generic [ref=e40]: Вы также всегда можете напрямую связаться с нами по номеру
+          - link "8 800 600 98 87" [ref=e41] [cursor=pointer]:
+            - /url: tel:88006009887
+        - generic [ref=e42]:
+          - generic [ref=e43]: Офис компании
+          - link "Фрунзе, 35а" [ref=e44] [cursor=pointer]:
+            - /url: "#"
+      - generic [ref=e46]:
+        - link "Политика конфиденциальности" [ref=e48] [cursor=pointer]:
+          - /url: "#"
+        - generic [ref=e49]: Все права защищены
+  - button "Open Next.js Dev Tools" [ref=e55] [cursor=pointer]:
+    - img [ref=e56]
+  - alert [ref=e59]

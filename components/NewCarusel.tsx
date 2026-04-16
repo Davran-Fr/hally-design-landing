@@ -9,6 +9,7 @@ import {
   MouseEvent,
   TouchEvent,
 } from "react";
+import { gsap } from "gsap";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,24 @@ interface NewCaruselProps {
   onSpinStart?: () => void;
   centerContent?: ReactNode;
   categoryGroups?: CategoryGroup[];
+  initialSpin?: number;
+  labelsOpacity?: number;
+  onActiveIndexChange?: (index: number) => void;
+  disableStaircase?: boolean;
+  cardFaceCamera?: boolean;
+  highlightActive?: boolean;
+  popOutX?: number;
+  activeAngleOffset?: number;
+  disableHover?: boolean;
+  cardBaseAngle?: number;
+}
+
+// ── Lerp helper ───────────────────────────────────────────────────────────
+
+function lerp(current: number, target: number, factor: number): number {
+  const diff = target - current;
+  if (Math.abs(diff) < 0.01) return target;
+  return current + diff * factor;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -69,18 +88,37 @@ export default function NewCarusel({
   onSpinStart,
   centerContent,
   categoryGroups,
+  initialSpin,
+  labelsOpacity = 1,
+  onActiveIndexChange,
+  disableStaircase = false,
+  cardFaceCamera = false,
+  highlightActive = false,
+  popOutX = 40,
+  activeAngleOffset = 0,
+  disableHover = false,
+  cardBaseAngle = -90,
 }: NewCaruselProps) {
   const itemCount = items.length;
 
+  // State that drives React re-renders (affects rendered card positions)
   const [rotation, setRotation] = useState<number>(0);
   const [yOffsetScale, setYOffsetScale] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [smoothMouse, setSmoothMouse] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [showCursor, setShowCursor] = useState<boolean>(false);
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [smoothCursor, setSmoothCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [cursorOpacity, setCursorOpacity] = useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+
+  // Refs for values that only affect DOM elements updated directly (no re-render needed)
+  const mousePosRef = useRef({ x: 0, y: 0 });
+  const smoothMouseRef = useRef({ x: 0, y: 0 });
+  const cursorPosRef = useRef({ x: 0, y: 0 });
+  const smoothCursorRef = useRef({ x: 0, y: 0 });
+  const cursorOpacityRef = useRef(0);
+  const showCursorRef = useRef(false);
+  const isDraggingRef = useRef(false);
+
+  // DOM refs for direct style updates
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
 
   const momentumRef = useRef<number>(0);
   const dragRef = useRef<{ active: boolean; lastX: number; startX: number }>({
@@ -94,8 +132,41 @@ export default function NewCarusel({
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSpinningRef = useRef<boolean>(false);
+  const isIntroducingRef = useRef<boolean>(false);
   const autoRotateRef = useRef<boolean>(autoRotate);
   autoRotateRef.current = autoRotate;
+
+  // Store props in refs so the unified RAF loop can read them without re-creating
+  const baseTiltAngleRef = useRef(baseTiltAngle);
+  baseTiltAngleRef.current = baseTiltAngle;
+  const mouseTiltIntensityRef = useRef(mouseTiltIntensity);
+  mouseTiltIntensityRef.current = mouseTiltIntensity;
+  const onSpinStartRef = useRef(onSpinStart);
+  onSpinStartRef.current = onSpinStart;
+  const activeAngleOffsetRef = useRef(activeAngleOffset);
+  activeAngleOffsetRef.current = activeAngleOffset;
+
+  // ── Intro spin — gsap-driven, eased, independent of momentum ───────────
+  useEffect(() => {
+    if (initialSpin && initialSpin > 0) {
+      isIntroducingRef.current = true;
+      const proxy = { val: 0 };
+      const tween = gsap.to(proxy, {
+        val: initialSpin,
+        duration: 3.0,
+        ease: "power3.out",
+        onUpdate: () => setRotation(proxy.val),
+        onComplete: () => {
+          isIntroducingRef.current = false;
+        },
+      });
+      return () => {
+        tween.kill();
+        isIntroducingRef.current = false;
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Wheel ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -118,16 +189,25 @@ export default function NewCarusel({
   const onMouseDown = useCallback((e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     dragRef.current = { active: true, lastX: e.clientX, startX: e.clientX };
+    isDraggingRef.current = true;
+    if (containerRef.current) containerRef.current.style.cursor = "grabbing";
 
     const handleGlobalMove = (ev: globalThis.MouseEvent) => {
       if (!dragRef.current.active) return;
       const delta = ev.clientX - dragRef.current.lastX;
       dragRef.current.lastX = ev.clientX;
-      momentumRef.current += delta * dragSpeed * 0.5;
+      // Invert direction when clearly on the far side (top) of the ring
+      const rect = containerRef.current?.getBoundingClientRect();
+      const centerY = rect ? rect.top + rect.height / 2 : 0;
+      const deadZone = rect ? rect.height * 0.15 : 0;
+      const dir = ev.clientY < centerY - deadZone ? -1 : 1;
+      momentumRef.current += delta * dragSpeed * 0.5 * dir;
     };
 
     const handleGlobalUp = () => {
       dragRef.current.active = false;
+      isDraggingRef.current = false;
+      if (containerRef.current) containerRef.current.style.cursor = "grab";
       window.removeEventListener("mousemove", handleGlobalMove);
       window.removeEventListener("mouseup", handleGlobalUp);
     };
@@ -135,7 +215,6 @@ export default function NewCarusel({
     window.addEventListener("mousemove", handleGlobalMove);
     window.addEventListener("mouseup", handleGlobalUp);
   }, [dragSpeed]);
-
 
   // ── Touch ─────────────────────────────────────────────────────────────
   const onTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
@@ -148,7 +227,12 @@ export default function NewCarusel({
       e.preventDefault();
       const delta = e.touches[0].clientX - touchRef.current.lastX;
       touchRef.current.lastX = e.touches[0].clientX;
-      momentumRef.current += delta * touchSpeed * 0.5;
+      // Invert direction when clearly on the far side (top) of the ring
+      const rect = containerRef.current?.getBoundingClientRect();
+      const centerY = rect ? rect.top + rect.height / 2 : 0;
+      const deadZone = rect ? rect.height * 0.15 : 0;
+      const dir = e.touches[0].clientY < centerY - deadZone ? -1 : 1;
+      momentumRef.current += delta * touchSpeed * 0.5 * dir;
     },
     [touchSpeed]
   );
@@ -157,10 +241,26 @@ export default function NewCarusel({
     touchRef.current.active = false;
   }, []);
 
-  // ── Momentum + autoRotate loop ─────────────────────────────────────────
+  // ── Mouse tracking for tilt ────────────────────────────────────────────
+  useEffect(() => {
+    const onMove = (e: globalThis.MouseEvent) => {
+      mousePosRef.current = {
+        x: (e.clientX / window.innerWidth) * 2 - 1,
+        y: -((e.clientY / window.innerHeight) * 2 - 1),
+      };
+      cursorPosRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  // ── Unified animation loop ─────────────────────────────────────────────
+  // Combines momentum/autoRotate, smooth mouse tilt, smooth cursor, and
+  // cursor opacity into a single requestAnimationFrame loop.
   useEffect(() => {
     let raf: number;
     const tick = () => {
+      // ─ Momentum + autoRotate ─
       if (autoRotateRef.current && Math.abs(momentumRef.current) < 0.1) {
         momentumRef.current += autoRotateSpeed * 0.05;
       }
@@ -172,8 +272,7 @@ export default function NewCarusel({
       }
 
       // Lerp yOffsetScale: 0 while spinning fast, 1 when stopped/slow
-      // Threshold 0.8 — autoRotate (~0.1) won't trigger flat mode
-      const isSpinning = Math.abs(momentumRef.current) > 0.8;
+      const isSpinning = isIntroducingRef.current || Math.abs(momentumRef.current) > 0.8;
       const scaleTarget = isSpinning ? 0 : 1;
       setYOffsetScale((p) => {
         const diff = scaleTarget - p;
@@ -185,10 +284,38 @@ export default function NewCarusel({
       if (isSpinning && !isSpinningRef.current) {
         if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current);
         setHoveredIndex(null);
-        setShowCursor(false);
-        onSpinStart?.();
+        showCursorRef.current = false;
+        onSpinStartRef.current?.();
       }
       isSpinningRef.current = isSpinning;
+
+      // ─ Smooth mouse tilt (direct DOM update) ─
+      const sm = smoothMouseRef.current;
+      const mp = mousePosRef.current;
+      sm.x = sm.x + (mp.x - sm.x) * 0.06;
+      sm.y = sm.y + (mp.y - sm.y) * 0.06;
+
+      if (tiltRef.current) {
+        const tiltAngle = baseTiltAngleRef.current;
+        const tiltIntensity = mouseTiltIntensityRef.current;
+        tiltRef.current.style.transform =
+          `rotateX(${tiltAngle + sm.y * tiltIntensity}deg) rotateY(${sm.x * tiltIntensity}deg)`;
+      }
+
+      // ─ Smooth cursor position + opacity (direct DOM update) ─
+      const sc = smoothCursorRef.current;
+      const cp = cursorPosRef.current;
+      sc.x = sc.x + (cp.x - sc.x) * 0.15;
+      sc.y = sc.y + (cp.y - sc.y) * 0.15;
+
+      const opacityTarget = showCursorRef.current ? 1 : 0;
+      cursorOpacityRef.current = lerp(cursorOpacityRef.current, opacityTarget, 0.15);
+
+      if (cursorRef.current) {
+        cursorRef.current.style.left = `${sc.x}px`;
+        cursorRef.current.style.top = `${sc.y}px`;
+        cursorRef.current.style.opacity = String(cursorOpacityRef.current);
+      }
 
       raf = requestAnimationFrame(tick);
     };
@@ -196,61 +323,17 @@ export default function NewCarusel({
     return () => cancelAnimationFrame(raf);
   }, [autoRotateSpeed]);
 
-  // ── Mouse tracking for tilt ────────────────────────────────────────────
+  // ── Active index tracking (front-most card) ───────────────────────────
   useEffect(() => {
-    const onMove = (e: globalThis.MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = (e.clientY / window.innerHeight) * 2 - 1;
-      setMousePos({ x, y: -y });
-      setCursorPos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-
-  // ── Smooth mouse tilt lerp ─────────────────────────────────────────────
-  useEffect(() => {
-    let raf: number;
-    const tick = () => {
-      setSmoothMouse((p) => ({
-        x: p.x + (mousePos.x - p.x) * 0.06,
-        y: p.y + (mousePos.y - p.y) * 0.06,
-      }));
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [mousePos.x, mousePos.y]);
-
-  // ── Smooth cursor lerp ─────────────────────────────────────────────────
-  useEffect(() => {
-    let raf: number;
-    const tick = () => {
-      setSmoothCursor((p) => ({
-        x: p.x + (cursorPos.x - p.x) * 0.15,
-        y: p.y + (cursorPos.y - p.y) * 0.15,
-      }));
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [cursorPos.x, cursorPos.y]);
-
-  // ── Cursor opacity fade ────────────────────────────────────────────────
-  useEffect(() => {
-    let raf: number;
-    const target = showCursor ? 1 : 0;
-    const tick = () => {
-      setCursorOpacity((c) => {
-        const d = target - c;
-        if (Math.abs(d) < 0.01) return target;
-        return c + d * 0.15;
-      });
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [showCursor]);
+    if (itemCount === 0) return;
+    const step = 360 / itemCount;
+    const raw = Math.round((-rotation + activeAngleOffsetRef.current) / step);
+    const idx = ((raw % itemCount) + itemCount) % itemCount;
+    if (idx !== activeIndex) {
+      setActiveIndex(idx);
+      onActiveIndexChange?.(idx);
+    }
+  }, [rotation, itemCount, onActiveIndexChange, activeIndex]);
 
   // ── Empty state ────────────────────────────────────────────────────────
   if (itemCount === 0) {
@@ -272,6 +355,7 @@ export default function NewCarusel({
   }
 
   const angleStep = 360 / itemCount;
+  const perspective = 1200;
 
   return (
     <>
@@ -279,7 +363,7 @@ export default function NewCarusel({
       <div
         ref={containerRef}
         onMouseDown={onMouseDown}
-        onMouseLeave={() => setShowCursor(false)}
+        onMouseLeave={() => { showCursorRef.current = false; }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -289,25 +373,23 @@ export default function NewCarusel({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          perspective: 1200,
-          perspectiveOrigin: "50% 50%",
+          perspective,
+          perspectiveOrigin: "0% 0%",
           touchAction: "none",
           userSelect: "none",
-          cursor: dragRef.current.active ? "grabbing" : "grab",
+          cursor: "grab",
         }}
       >
         {/* Tilt wrapper — reacts to mouse */}
         <div
+          ref={tiltRef}
           style={{
             transformStyle: "preserve-3d",
-            transform: `
-              rotateX(${baseTiltAngle + smoothMouse.y * mouseTiltIntensity}deg)
-              rotateY(${smoothMouse.x * mouseTiltIntensity}deg)
-            `,
+            transform: `rotateX(${baseTiltAngle}deg) rotateY(0deg)`,
             transition: "transform 0.05s linear",
           }}
         >
-          {/* Ring — 0×0 point at orbit center */}
+          {/* Ring — 0x0 point at orbit center */}
           <div
             style={{
               position: "relative",
@@ -321,7 +403,9 @@ export default function NewCarusel({
               const midIndex = (group.startIndex + group.endIndex) / 2;
               const midAngle = rotation + angleStep * midIndex;
               const midAngleRad = (midAngle * Math.PI) / 180;
-              const labelYOffset = (Math.cos(midAngleRad) * 0.75 - 1) * 100 * yOffsetScale;
+              const labelYOffset = disableStaircase
+                ? 0
+                : (Math.cos(midAngleRad) * 0.75 - 1) * 100 * yOffsetScale;
 
               return (
                 <div
@@ -330,10 +414,11 @@ export default function NewCarusel({
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
-                    // Place at midpoint angle on ring, push beyond cards, counter-rotate to face camera
                     transform: `translateX(-50%) translateY(-100%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 125}px) rotateY(${-midAngle}deg)`,
                     pointerEvents: "none",
                     whiteSpace: "nowrap",
+                    opacity: labelsOpacity,
+                    transition: "opacity 0.8s ease-out",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
@@ -366,44 +451,44 @@ export default function NewCarusel({
             {items.map((item, i) => {
               const angle = rotation + angleStep * i;
               const isHovered = hoveredIndex === i;
+              const isPoppedOut = isHovered || (highlightActive && activeIndex === i);
 
-              // Staircase Y offset: 0 while spinning, smooth lerp to full when stopped
               const angleRad = (angle * Math.PI) / 180;
-              const yOffset = (Math.cos(angleRad) - 1) * 60 * yOffsetScale;
+              const yOffset = disableStaircase
+                ? 0
+                : (Math.cos(angleRad) - 1) * 60 * yOffsetScale;
 
               return (
-                // Outer div — fixed orbit position, owns the hit-box so it never moves
                 <div
                   key={i}
                   suppressHydrationWarning
-                  onMouseEnter={() => {
+                  onMouseEnter={disableHover ? undefined : () => {
                     if (isSpinningRef.current) return;
                     if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current);
                     setHoveredIndex(i);
                     if (!isScrollingRef.current) {
-                      setShowCursor(true);
+                      showCursorRef.current = true;
                       onCardHover?.(item, i);
                     }
                   }}
-                  onMouseLeave={() => {
+                  onMouseLeave={disableHover ? undefined : () => {
                     hoverLeaveTimerRef.current = setTimeout(() => {
                       setHoveredIndex(null);
-                      setShowCursor(false);
+                      showCursorRef.current = false;
                       onCardHoverEnd?.();
                     }, 80);
                   }}
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
-                    transform: `translateX(-50%) translateY(-100%) translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px) rotateY(-90deg)`,
+                    transform: `translateX(-50%) translateY(-100%) translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px) ${cardFaceCamera ? `rotateY(${-angle + 15}deg)` : `rotateY(${cardBaseAngle}deg)`}`,
+                    cursor: isDraggingRef.current ? "grabbing" : "pointer",
                   }}
                 >
-                  {/* Inner div — visual slide only, pointer-events disabled so the
-                      outer hit-box is the sole source of hover truth */}
                   <div
                     style={{
                       transformStyle: "preserve-3d",
-                      transform: `translateX(${isHovered ? 40 : 0}px)`,
+                      transform: `translateX(${isPoppedOut ? popOutX : 0}px)`,
                       transition: "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                       pointerEvents: "none",
                     }}
@@ -452,10 +537,11 @@ export default function NewCarusel({
 
       {/* Custom "View" cursor */}
       <div
+        ref={cursorRef}
         style={{
           position: "fixed",
-          left: smoothCursor.x,
-          top: smoothCursor.y,
+          left: 0,
+          top: 0,
           transform: "translate(-50%, -50%)",
           backgroundColor: "#fff",
           color: "#000",
@@ -467,7 +553,7 @@ export default function NewCarusel({
           pointerEvents: "none",
           zIndex: 9999,
           whiteSpace: "nowrap",
-          opacity: cursorOpacity,
+          opacity: 0,
         }}
       >
         View

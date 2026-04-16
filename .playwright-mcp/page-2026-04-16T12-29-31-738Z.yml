@@ -1,0 +1,183 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Hally" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Hally" [ref=e5]
+      - button "Toggle menu" [ref=e6]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: Architecture
+                - generic: (4)
+            - generic:
+              - generic:
+                - generic: Bedroom
+                - generic: (9)
+            - generic:
+              - generic:
+                - generic: Dining Room
+                - generic: (5)
+            - generic:
+              - generic:
+                - generic: Kitchen
+                - generic: (1)
+            - generic:
+              - generic:
+                - generic: Living Room
+                - generic: (7)
+            - generic:
+              - generic:
+                - generic: Master Bedroom
+                - generic: (1)
+            - generic:
+              - generic:
+                - generic: Pool & Wellness
+                - generic: (4)
+            - generic:
+              - generic:
+                - generic: Showroom
+                - generic: (1)
+            - generic [ref=e13] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Concrete Villa"
+            - generic [ref=e14] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Concrete Villa"
+            - generic [ref=e15] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Concrete Villa"
+            - generic [ref=e16] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Concrete Villa"
+            - generic [ref=e17] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Sage Retreat"
+            - generic [ref=e18] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Solar Bedroom"
+            - generic [ref=e19] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Noir Suite"
+            - generic [ref=e20] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Dark Walnut Suite"
+            - generic [ref=e21] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Dark Walnut Suite"
+            - generic [ref=e22] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Dark Walnut Suite"
+            - generic [ref=e23] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Dark Walnut Suite"
+            - generic [ref=e24] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Dark Walnut Suite"
+            - generic [ref=e25] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Dark Walnut Suite"
+            - generic [ref=e26] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Marble Garden"
+            - generic [ref=e27] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Marble Garden"
+            - generic [ref=e28] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Marble Garden"
+            - generic [ref=e29] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Marble Garden"
+            - generic [ref=e30] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Bloom Dining"
+            - generic [ref=e31] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Emerald Kitchen"
+            - generic [ref=e32] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Taupe Studio"
+            - generic [ref=e33] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Art Living"
+            - generic [ref=e34] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Crystal Lounge"
+            - generic [ref=e35] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Walnut Hall"
+            - generic [ref=e36] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Emerald Lounge"
+            - generic [ref=e37] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Emerald Lounge"
+            - generic [ref=e38] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Emerald Lounge"
+            - generic [ref=e39] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Grand Classique"
+            - generic [ref=e40] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Aqua Spa"
+            - generic [ref=e41] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Aqua Spa"
+            - generic [ref=e42] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Aqua Spa"
+            - generic [ref=e43] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Aqua Spa"
+            - generic [ref=e44] [cursor=pointer]:
+              - generic:
+                - generic:
+                  - img "Graphite Atelier"
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - paragraph [ref=e50]: Architecture
+          - generic [ref=e51]:
+            - img "Concrete Villa" [ref=e52]
+            - heading "Concrete Villa" [level=2] [ref=e55]
+        - heading "HALLY" [level=1]
+      - generic: View
+  - button "Open Next.js Dev Tools" [ref=e61] [cursor=pointer]:
+    - img [ref=e62]
+  - alert [ref=e65]

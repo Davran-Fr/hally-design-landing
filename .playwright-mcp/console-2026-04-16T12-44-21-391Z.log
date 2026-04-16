@@ -1,0 +1,123 @@
+[     250ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[     281ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[     299ms] [WARNING] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[     319ms] [WARNING] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[     557ms] [WARNING] Image with src "/carusel/carusel3.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   59745ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   59811ms] [LOG] [Fast Refresh] done in 144ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   72062ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   72081ms] ReferenceError: ringRotateZ is not defined
+    at NewCarusel (http://localhost:3001/_next/static/chunks/_0ubpgpf._.js?id=%255Bproject%255D%252Fcomponents%252FNewCarusel.tsx+%255Bapp-client%255D+%2528ecmascript%2529:385:25)
+    at Object.react_stack_bottom_frame (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:15037:24)
+    at renderWithHooks (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6081:21)
+    at beginWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:965:74)
+    at performUnitOfWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9555:97)
+    at workLoopSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9449:40)
+    at renderRootSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9098:47)
+    at performSyncWorkOnRoot (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:10179:316)
+    at flushSyncWork$1 (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9230:86)
+    at Object.scheduleRefresh (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:299:13)
+    at http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:391:33
+    at Set.forEach (<anonymous>)
+    at Object.performReactRefresh (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:384:38)
+    at applyUpdate (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:878:31)
+    at http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:886:13
+[   72108ms] [LOG] [Fast Refresh] done in 29ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85175ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85178ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85264ms] ReferenceError: ringRotateZ is not defined
+    at eval (http://localhost:3001/_next/static/chunks/_0ubpgpf._.js?id=%255Bproject%255D%252Fcomponents%252FNewCarusel.tsx+%255Bapp-client%255D+%2528ecmascript%2529:409:208)
+    at Array.map (<anonymous>)
+    at NewCarusel (http://localhost:3001/_next/static/chunks/_0ubpgpf._.js?id=%255Bproject%255D%252Fcomponents%252FNewCarusel.tsx+%255Bapp-client%255D+%2528ecmascript%2529:398:45)
+    at Object.react_stack_bottom_frame (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:15037:24)
+    at renderWithHooks (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6081:21)
+    at beginWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:965:74)
+    at performUnitOfWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9555:97)
+    at workLoopSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9449:40)
+    at renderRootSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9098:47)
+    at performSyncWorkOnRoot (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:10179:316)
+    at flushSyncWork$1 (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9230:86)
+    at Object.scheduleRefresh (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:299:13)
+    at http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:391:33
+    at Set.forEach (<anonymous>)
+    at Object.performReactRefresh (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:384:38)
+    at applyUpdate (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:878:31)
+    at http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:886:13
+[   85213ms] [LOG] [Fast Refresh] done in 54ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85491ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85518ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85537ms] [WARNING] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85684ms] ReferenceError: ringRotateZ is not defined
+    at http://localhost:3001/_next/static/chunks/_0ubpgpf._.js:410:208
+    at Array.map (<anonymous>)
+    at NewCarusel (http://localhost:3001/_next/static/chunks/_0ubpgpf._.js:399:45)
+    at Object.react_stack_bottom_frame (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:15037:24)
+    at renderWithHooks (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6081:21)
+    at beginWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:965:74)
+    at performUnitOfWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9555:97)
+    at workLoopSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9449:40)
+    at renderRootSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9098:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:2647:64)
+[   85833ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[   85890ms] [LOG] [Fast Refresh] done in 159ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113152ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113155ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113180ms] [LOG] [Fast Refresh] done in 35ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113371ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113398ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113415ms] [WARNING] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113695ms] ReferenceError: ringRotateZ is not defined
+    at http://localhost:3001/_next/static/chunks/_0ubpgpf._.js:498:233
+    at Array.map (<anonymous>)
+    at NewCarusel (http://localhost:3001/_next/static/chunks/_0ubpgpf._.js:469:35)
+    at Object.react_stack_bottom_frame (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:15037:24)
+    at renderWithHooks (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6081:21)
+    at beginWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:965:74)
+    at performUnitOfWork (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9555:97)
+    at workLoopSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9449:40)
+    at renderRootSync (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:9098:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_react-dom_0i43cm-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3001/_next/static/chunks/0r_m_next_dist_compiled_0zagswi._.js:2647:64)
+[  113723ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  113788ms] [LOG] [Fast Refresh] done in 167ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127471ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127474ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127495ms] [LOG] [Fast Refresh] done in 36ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127684ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127710ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127769ms] [WARNING] Image with src "/logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127793ms] [WARNING] Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127805ms] [WARNING] Image with src "/carusel/carusel3.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  127963ms] [WARNING] Image with src "/carusel/carusel7.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  138368ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  138389ms] [LOG] [Fast Refresh] done in 50ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  500324ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  500359ms] [LOG] [Fast Refresh] done in 121ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  511099ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  511123ms] [LOG] [Fast Refresh] done in 41ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  521527ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  521551ms] [LOG] [Fast Refresh] done in 33ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  532882ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431
+[  532937ms] [LOG] [Fast Refresh] done in 54ms @ http://localhost:3001/_next/static/chunks/0r_m_next_dist_13~aa_a._.js:2431

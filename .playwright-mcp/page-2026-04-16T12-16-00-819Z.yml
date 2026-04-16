@@ -1,0 +1,11 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Hally" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Hally" [ref=e5]
+      - button "Toggle menu" [ref=e6]
+  - main [ref=e10]
+  - button "Open Next.js Dev Tools" [ref=e16] [cursor=pointer]:
+    - img [ref=e17]
+  - alert [ref=e20]

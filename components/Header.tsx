@@ -2,15 +2,68 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMenuAnimation } from '@/hooks/useMenuAnimation';
+
+const GridIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="9" y="1.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="1.5" y="9" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="9" y="9" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+  </svg>
+);
+
+const CarouselIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.3" />
+    <circle cx="8" cy="8" r="1.6" fill="currentColor" />
+  </svg>
+);
 
 const NAV_LINKS = [
   { label: 'Home',     href: '/' },
   { label: 'Projects', href: '/projects' },
   { label: 'About',    href: '/about' },
 ];
+
+// Isolated so useSearchParams doesn't force the whole header into a Suspense boundary
+function ViewToggle() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isGrid = searchParams.get('view') === 'grid';
+
+  const toggleView = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (isGrid) {
+      params.delete('view');
+    } else {
+      params.set('view', 'grid');
+    }
+    const query = params.toString();
+    router.replace(query ? `/projects?${query}` : '/projects', { scroll: false });
+  };
+
+  return (
+    <button
+      onClick={toggleView}
+      aria-label={isGrid ? 'Switch to carousel view' : 'Switch to grid view'}
+      className="
+        group relative flex items-center gap-2 h-10 pl-3 pr-4
+        rounded-xl bg-brand/20 border border-brand/50 backdrop-blur-2xl
+        text-brand hover:bg-brand hover:text-white
+        transition-colors duration-300 ease-out
+        font-cormorant text-xs tracking-[0.14em] uppercase font-medium
+      "
+    >
+      <span className="flex items-center justify-center w-6 h-6 rounded-md bg-white/70 group-hover:bg-white/15 transition-colors duration-300">
+        {isGrid ? <CarouselIcon /> : <GridIcon />}
+      </span>
+      <span>{isGrid ? 'Carousel' : 'Grid'}</span>
+    </button>
+  );
+}
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -72,6 +125,15 @@ export default function Header() {
           </button>
         </div>
       </header>
+
+      {/* ── View Toggle (Projects only) — mirrors header on the right ── */}
+      {isProjects && (
+        <div className="fixed top-2.5 right-6 z-50 hidden md:flex items-center h-12">
+          <Suspense fallback={null}>
+            <ViewToggle />
+          </Suspense>
+        </div>
+      )}
 
       {/* ── Full-screen Mobile Overlay ── */}
       <div
