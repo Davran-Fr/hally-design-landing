@@ -52,6 +52,7 @@ interface NewCaruselProps {
   centerContent?: ReactNode;
   categoryGroups?: CategoryGroup[];
   initialSpin?: number;
+  initialRadius?: number;
   labelsOpacity?: number;
   onActiveIndexChange?: (index: number) => void;
   disableStaircase?: boolean;
@@ -89,6 +90,7 @@ export default function NewCarusel({
   centerContent,
   categoryGroups,
   initialSpin,
+  initialRadius,
   labelsOpacity = 1,
   onActiveIndexChange,
   disableStaircase = false,
@@ -102,6 +104,7 @@ export default function NewCarusel({
   const itemCount = items.length;
 
   // State that drives React re-renders (affects rendered card positions)
+  const [animatedRadius, setAnimatedRadius] = useState<number>(initialRadius ?? radius);
   const [rotation, setRotation] = useState<number>(0);
   const [yOffsetScale, setYOffsetScale] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -146,25 +149,39 @@ export default function NewCarusel({
   const activeAngleOffsetRef = useRef(activeAngleOffset);
   activeAngleOffsetRef.current = activeAngleOffset;
 
-  // ── Intro spin — gsap-driven, eased, independent of momentum ───────────
+  // ── Intro animation — spin + radius expand ─────────────────────────────
   useEffect(() => {
+    const tweens: gsap.core.Tween[] = [];
+
     if (initialSpin && initialSpin > 0) {
       isIntroducingRef.current = true;
-      const proxy = { val: 0 };
-      const tween = gsap.to(proxy, {
+      const spinProxy = { val: 0 };
+      tweens.push(gsap.to(spinProxy, {
         val: initialSpin,
         duration: 3.0,
         ease: "power3.out",
-        onUpdate: () => setRotation(proxy.val),
+        onUpdate: () => setRotation(spinProxy.val),
         onComplete: () => {
           isIntroducingRef.current = false;
         },
-      });
-      return () => {
-        tween.kill();
-        isIntroducingRef.current = false;
-      };
+      }));
     }
+
+    if (initialRadius != null && initialRadius !== radius) {
+      const radiusProxy = { val: initialRadius };
+      tweens.push(gsap.to(radiusProxy, {
+        val: radius,
+        duration: 2.5,
+        ease: "power3.out",
+        delay: 0.3,
+        onUpdate: () => setAnimatedRadius(radiusProxy.val),
+      }));
+    }
+
+    return () => {
+      tweens.forEach(t => t.kill());
+      isIntroducingRef.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -415,7 +432,7 @@ export default function NewCarusel({
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
-                    transform: `translateX(-50%) translateY(-100%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${radius + 125}px) rotateY(${-midAngle}deg) rotateX(${-baseTiltAngle}deg)`,
+                    transform: `translateX(-50%) translateY(-100%) translateY(${labelYOffset}px) rotateY(${midAngle}deg) translateZ(${animatedRadius + 125}px) rotateY(${-midAngle}deg) rotateX(${-baseTiltAngle}deg)`,
                     pointerEvents: "none",
                     whiteSpace: "nowrap",
                     opacity: labelsOpacity,
@@ -482,7 +499,7 @@ export default function NewCarusel({
                   style={{
                     position: "absolute",
                     transformStyle: "preserve-3d",
-                    transform: `translateX(-50%) translateY(-100%) translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${radius}px) ${cardFaceCamera ? `rotateY(${-angle + 15}deg)` : `rotateY(${cardBaseAngle}deg)`}`,
+                    transform: `translateX(-50%) translateY(-100%) translateY(${yOffset}px) rotateY(${angle}deg) translateZ(${animatedRadius}px) ${cardFaceCamera ? `rotateY(${-angle + 15}deg)` : `rotateY(${cardBaseAngle}deg)`}`,
                     cursor: isDraggingRef.current ? "grabbing" : "pointer",
                   }}
                 >

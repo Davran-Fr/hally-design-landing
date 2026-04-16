@@ -9,7 +9,7 @@ import { gsap } from "gsap";
 function useXLScale(): number {
   const [scale, setScale] = useState<number>(1);
   useEffect(() => {
-    const update = () => setScale(window.innerWidth > 2000 ? 1.4 : 1);
+    const update = () => setScale(window.innerWidth > 2000 ? 1.5 : 1);
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
@@ -365,7 +365,7 @@ function CarouselView(): ReactNode {
         <section
           className="relative flex-1"
           style={{
-            transform: "translate(100vw, 0)",
+            transform: "translate(calc(50vw + 200px), 0)",
             touchAction: "none",
           }}
           data-lenis-prevent
@@ -405,6 +405,7 @@ function CarouselView(): ReactNode {
         <NewCarusel
           items={carouselItems}
           initialSpin={1080}
+          initialRadius={250}
           labelsOpacity={labelsOpacity}
           radius={375 * scale}
           scrollSpeed={0.01}
@@ -438,7 +439,7 @@ function CarouselView(): ReactNode {
                   <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(0,0,0,0.5)", margin: 0 }}>
                     {displayProject.category}
                   </p>
-                  <FeaturedCard project={displayProject} scale={scale > 1 ? 1.15 : 0.9} />
+                  <FeaturedCard project={displayProject} scale={scale > 1 ? 1.24 : 0.9} />
                 </div>
                 {/* HALLY overlay — absolute, centered over featured layer */}
                 <h1
